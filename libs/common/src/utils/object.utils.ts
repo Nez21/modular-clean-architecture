@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-dynamic-delete */
-
 export type ReadonlyDate = Omit<Date, `set${string}`>
 
 export type DeepReadonly<T> = T extends (infer R)[]
@@ -24,24 +22,4 @@ export const deepFreeze = <T extends object>(obj: T): DeepReadonly<T> => {
   }
 
   return Object.freeze(obj) as DeepReadonly<T>
-}
-
-export const removeCircular = (obj: unknown): unknown => {
-  if (!obj || typeof obj !== 'object') return obj
-
-  obj = structuredClone(obj)
-  const seen = new WeakMap()
-  const recurse = (obj: object) => {
-    seen.set(obj, true)
-
-    for (const [key, value] of Object.entries(obj)) {
-      if (!value || typeof value !== 'object' || [Date, RegExp, BigInt].some((t) => value instanceof t)) continue
-      if (seen.has(value as object)) delete obj[key]
-      else recurse(value as object)
-    }
-  }
-
-  recurse(obj as object)
-
-  return obj
 }

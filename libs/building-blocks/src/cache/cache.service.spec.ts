@@ -133,7 +133,7 @@ describe('CacheService', () => {
       await service.keyValueSet(key, obj)
       const result = await service.keyValueGet(key)
 
-      expect(result).toEqual({ foo: 'bar' })
+      expect(result).toEqual(obj)
     })
 
     it('should delete a key', async () => {

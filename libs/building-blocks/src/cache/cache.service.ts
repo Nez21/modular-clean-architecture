@@ -3,7 +3,7 @@ import { GlideString, TimeUnit, Transaction } from '@valkey/valkey-glide'
 
 import ms from 'ms'
 
-import { deserialize, removeCircular, serialize } from '@internal/common'
+import { deserialize, serialize } from '@internal/common'
 
 import { DefaultCacheTTL } from './cache.const'
 import { CacheModuleOptions } from './cache.module.types'
@@ -35,7 +35,7 @@ export class CacheService implements ICacheService {
   private serializeValue<T>(value: T): GlideString {
     if (value instanceof Buffer) return value
 
-    return serialize(removeCircular(value))
+    return serialize(value)
   }
 
   private deserializeValue<T>(value: GlideString | null | undefined): T | undefined {

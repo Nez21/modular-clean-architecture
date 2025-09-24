@@ -20,7 +20,7 @@ describe('Entity Type', () => {
     }
   }
 
-  let validEntityData: z.output<typeof testEntitySchema>
+  let validEntityData: z.input<typeof testEntitySchema>
 
   beforeEach(() => {
     validEntityData = {
