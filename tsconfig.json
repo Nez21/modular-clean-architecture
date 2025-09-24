@@ -1,0 +1,28 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compileOnSave": false,
+  "files": [],
+  "references": [
+    {
+      "path": "./libs/common"
+    },
+    {
+      "path": "./libs/building-blocks"
+    },
+    {
+      "path": "./libs/contracts/shared"
+    },
+    {
+      "path": "./libs/contracts/user"
+    },
+    {
+      "path": "./libs/modules/user"
+    },
+    {
+      "path": "./libs/modules/localization"
+    },
+    {
+      "path": "./apps/entry-point"
+    }
+  ]
+}

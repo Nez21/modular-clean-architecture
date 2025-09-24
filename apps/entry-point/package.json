@@ -1,0 +1,43 @@
+{
+  "name": "entry-point",
+  "version": "1.0.0",
+  "private": true,
+  "nx": {
+    "targets": {
+      "dev": {
+        "executor": "@nx/js:node",
+        "dependsOn": [
+          "build:development"
+        ],
+        "options": {
+          "buildTarget": "entry-point:build:development",
+          "runBuildTargetDependencies": false
+        }
+      },
+      "build": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "webpack-cli build",
+          "args": [
+            "--mode production"
+          ]
+        },
+        "configurations": {
+          "development": {
+            "args": [
+              "--mode development"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "nestjs-pino": "4.4.0",
+    "pino-http": "10.4.0"
+  },
+  "devDependencies": {
+    "pino-pretty": "~13.0.0",
+    "pino-webpack-plugin": "~2.0.0"
+  }
+}

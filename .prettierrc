@@ -1,0 +1,15 @@
+{
+  "overrides": [
+    {
+      "excludeFiles": ["**/tsconfig*.json"],
+      "files": ["**/*.json"],
+      "options": {
+        "plugins": ["prettier-plugin-sort-json"]
+      }
+    }
+  ],
+  "printWidth": 120,
+  "semi": false,
+  "singleQuote": true,
+  "trailingComma": "none"
+}
