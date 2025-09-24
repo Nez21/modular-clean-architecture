@@ -5,9 +5,9 @@ import type { DynamicModule } from '@nestjs/common'
 import type { PostgresDataModuleOptions } from './data/postgres'
 import { PostgresDataModule } from './data/postgres'
 
-export interface UserModuleOptions {
+export interface IdentityModuleOptions {
   postgres: PostgresDataModuleOptions
-  nodeEnv: 'development' | 'production'
+  nodeEnv: NodeEnv
 }
 
 @RestateService('User')
@@ -20,16 +20,16 @@ export class UserService {
   }
 }
 
-export class UserModule {
-  static register(options: UserModuleOptions): DynamicModule {
+export class IdentityModule {
+  static register(options: IdentityModuleOptions): DynamicModule {
     const { postgres } = options
 
     return {
-      module: UserModule,
+      module: IdentityModule,
       imports: [
         PostgresDataModule.register(postgres)
         // GraphQLTransportModule.forEndpoint({
-        //   endpoint: '/user',
+        //   endpoint: '/identity',
         //   features: [],
         //   nodeEnv
         // })

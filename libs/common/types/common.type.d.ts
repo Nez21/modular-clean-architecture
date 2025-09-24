@@ -71,3 +71,5 @@ type NonEmptyArray<T> = [T, ...T[]]
 type CustomInstanceType<T> = T extends Class<infer R>[] ? R[] : T extends Class<infer R> ? R : never
 
 type Action<T> = (() => Promise<T>) | (() => T)
+
+type NodeEnv = 'development' | 'production'

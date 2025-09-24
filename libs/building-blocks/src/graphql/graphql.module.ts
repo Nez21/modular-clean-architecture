@@ -14,7 +14,7 @@ import { ICacheService } from '#/cache'
 export interface GraphQLTransportModuleOptions {
   endpoint: string
   features: NonEmptyArray<Class>
-  nodeEnv: 'development' | 'production'
+  nodeEnv: NodeEnv
 }
 
 export class GraphQLTransportModule {

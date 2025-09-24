@@ -13,10 +13,8 @@ export class User extends Entity(
       .enum(['Male', 'Female', 'Other'])
       .nullish()
       .transform((v) => v ?? undefined),
-    metadata: z.object({
-      createdAt: z.date(),
-      updatedAt: z.date()
-    })
+    createdAt: z.date(),
+    updatedAt: z.date()
   }),
   ['id']
 ) {}

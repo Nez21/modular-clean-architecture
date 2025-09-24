@@ -1,14 +1,18 @@
+import { core as zCore } from 'zod/v4'
+
+type TypeOfBrand<T> = T extends { [zCore.$brand]: infer U } ? (T extends infer R & { [zCore.$brand]: U } ? R : T) : T
+
 export type ReadonlyDate = Omit<Date, `set${string}`>
 
 export type DeepReadonly<T> = T extends (infer R)[]
   ? ReadonlyArray<DeepReadonly<R>>
   : T extends Function
     ? T
-    : T extends object
-      ? T extends Date
-        ? ReadonlyDate
-        : { readonly [P in keyof T]: DeepReadonly<T[P]> }
-      : T
+    : T extends Date
+      ? ReadonlyDate
+      : T extends object
+        ? { readonly [P in keyof T]: DeepReadonly<TypeOfBrand<T[P]>> }
+        : T
 
 export const deepFreeze = <T extends object>(obj: T): DeepReadonly<T> => {
   const propNames = Object.getOwnPropertyNames(obj)

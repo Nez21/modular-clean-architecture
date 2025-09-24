@@ -1,7 +1,7 @@
 import { deserialize, serialize } from '@internal/common'
 
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import { GlideString, TimeUnit, Transaction } from '@valkey/valkey-glide'
+import { Batch, GlideString, TimeUnit, Transaction } from '@valkey/valkey-glide'
 import ms from 'ms'
 
 import { DefaultCacheTTL } from './cache.const'
@@ -105,16 +105,16 @@ export class CacheService implements ICacheService {
   async assignTags(keys: string[], tags: string[]): Promise<void> {
     if (keys.length === 0 || tags.length === 0) return
 
-    const transaction = new Transaction()
+    const batch = new Batch(true)
 
     for (const tag of tags) {
-      transaction.sadd(
+      batch.sadd(
         this.getCacheTagKey(tag),
         keys.map((key) => this.getPrefixedKey(key))
       )
     }
 
-    await this.valkey.exec(transaction)
+    await this.valkey.exec(batch, true)
   }
 
   async deleteByTags(...tags: string[]): Promise<void> {
@@ -158,7 +158,7 @@ export class CacheService implements ICacheService {
     if (cacheMissKeyParams.length > 0) {
       const results = await resolver(cacheMissKeyParams)
       const hitKeys: string[] = []
-      const transaction = new Transaction()
+      const batch = new Batch(true)
 
       for (const [index, keyParams] of cacheMissKeyParams.entries()) {
         if (!results[index]) continue
@@ -167,21 +167,19 @@ export class CacheService implements ICacheService {
         hitKeys.push(key)
         values[keys.indexOf(key)] = results[index]
 
-        transaction.set(key, this.serializeValue(results[index]))
+        batch.set(key, this.serializeValue(results[index]))
         const ttl = ms(options.ttl ?? this.defaultTTL)
 
         if (ttl !== 0) {
-          transaction.expire(key, ttl / 1000)
+          batch.expire(key, ttl / 1000)
         }
       }
 
       for (const tag of options.tags || []) {
-        transaction.sadd(this.getCacheTagKey(tag), hitKeys)
+        batch.sadd(this.getCacheTagKey(tag), hitKeys)
       }
 
-      if (transaction.commands.length > 0) {
-        await this.valkey.exec(transaction)
-      }
+      await this.valkey.exec(batch, true)
     }
 
     return values

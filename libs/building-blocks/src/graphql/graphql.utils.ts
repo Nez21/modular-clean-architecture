@@ -7,7 +7,6 @@ import { GraphQLBoolean, GraphQLFloat, GraphQLInt, GraphQLString } from 'graphql
 import { GraphQLBigInt, GraphQLDateTime, GraphQLEmailAddress, GraphQLURL, GraphQLUUID } from 'graphql-scalars'
 import z from 'zod'
 
-// Define the GraphQL metadata type
 type GraphQLMetadata = {
   name?: string | { input: string; output: string }
   type?: GraphQLScalarType

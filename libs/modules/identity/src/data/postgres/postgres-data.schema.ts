@@ -1,4 +1,4 @@
-import { pgEnum, pgTable, text, uuid } from 'drizzle-orm/pg-core'
+import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 export const gender = pgEnum('Gender', ['Male', 'Female', 'Other'])
 
@@ -6,5 +6,7 @@ export const users = pgTable('User', {
   id: uuid('id').notNull().primaryKey(),
   email: text('email').notNull().unique(),
   name: text('name').notNull(),
-  gender: gender('gender')
+  gender: gender('gender'),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow()
 })

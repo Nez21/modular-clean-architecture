@@ -10,7 +10,7 @@
       "path": "./libs/building-blocks"
     },
     {
-      "path": "./libs/modules/user"
+      "path": "./libs/modules/identity"
     },
     {
       "path": "./libs/modules/localization"

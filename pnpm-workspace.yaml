@@ -3,4 +3,4 @@ packages:
   - 'libs/building-blocks'
   - 'libs/common'
   - 'libs/modules/localization'
-  - 'libs/modules/user'
+  - 'libs/modules/identity'

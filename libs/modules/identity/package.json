@@ -1,5 +1,5 @@
 {
-  "name": "@internal/user-module",
+  "name": "@internal/identity-module",
   "version": "1.0.0",
   "private": true,
   "main": "./dist/index.js",
