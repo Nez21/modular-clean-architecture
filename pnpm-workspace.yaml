@@ -2,7 +2,5 @@ packages:
   - 'apps/*'
   - 'libs/building-blocks'
   - 'libs/common'
-  - 'libs/contracts/shared'
-  - 'libs/contracts/user'
   - 'libs/modules/localization'
   - 'libs/modules/user'

@@ -1,6 +1,7 @@
 import type { CamelCase, PascalCase, SnakeCase, TitleCase } from 'string-ts'
 import { camelCase, snakeCase, pascalCase, titleCase } from 'string-ts'
 import { z } from 'zod'
+import type { core as zCore } from 'zod'
 
 export type NameConvention = 'camelCase' | 'snakeCase' | 'pascalCase' | 'titleCase' | 'none'
 
@@ -27,7 +28,7 @@ export type TransformString<T extends string, TNameConvention extends NameConven
 export class MapperError extends z.ZodError {
   constructor(
     private readonly baseMessage: string,
-    issues: z.ZodIssue[]
+    issues: zCore.$ZodIssue[]
   ) {
     super(issues)
   }
@@ -37,21 +38,13 @@ export class MapperError extends z.ZodError {
   }
 }
 
-type GetPropertyShape<TSchema extends z.ZodObject<z.ZodRawShape>, TKey> = TKey extends keyof TSchema['shape']
+type GetPropertySchema<TSchema extends z.ZodObject<z.ZodRawShape>, TKey> = TKey extends keyof TSchema['shape']
   ? TSchema['shape'][TKey] extends z.ZodObject<z.ZodRawShape>
-    ? TSchema['shape'][TKey]['shape']
+    ? TSchema['shape'][TKey]
     : TSchema['shape'][TKey] extends z.ZodArray<z.ZodObject<z.ZodRawShape>>
-      ? TSchema['shape'][TKey]['element']['shape']
+      ? TSchema['shape'][TKey]['element']
       : never
   : never
-
-type GetPropertySchema<TSchema extends z.ZodObject<z.ZodRawShape>, TKey extends keyof TSchema['shape']> = z.ZodObject<
-  GetPropertyShape<TSchema, TKey>,
-  'strip',
-  z.ZodTypeAny,
-  z.objectOutputType<GetPropertyShape<TSchema, TKey>, z.ZodTypeAny, 'strip'>,
-  z.objectInputType<GetPropertyShape<TSchema, TKey>, z.ZodTypeAny, 'strip'>
->
 
 export interface MapperBuilder<
   TSourceSchema extends z.ZodObject<z.ZodRawShape>,
@@ -77,7 +70,7 @@ export interface MapperBuilder<
         GetPropertySchema<TDestSchema, TDestKey>,
         TNameConvention
       >
-    ) => (source: Element<z.input<TSourceSchema>[TSourceKey]>) => Element<z.input<TDestSchema>[TDestKey]>
+    ) => (source: Element<z.output<TSourceSchema>[TSourceKey]>) => Element<z.input<TDestSchema>[TDestKey]>
   >(
     destSelector: (dest: { [K in keyof z.input<TDestSchema>]-?: K }) => TDestKey,
     sourceSelector: (source: { [K in keyof z.output<TSourceSchema>]-?: K }) => TSourceKey,
@@ -114,9 +107,9 @@ const createProxy = <T>() => {
   return { property, proxy }
 }
 
-const getPropertySchema = (schema: z.AnyZodObject, key: string) => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-  let propSchema = schema.shape[key as keyof z.AnyZodObject['shape']]
+const getPropertySchema = (schema: z.ZodObject, key: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  let propSchema = schema.shape[key]
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   propSchema = propSchema instanceof z.ZodArray ? propSchema.element : propSchema
 
@@ -257,7 +250,7 @@ export function createMapper<
           throw new MapperError('Source and destination schemas are not compatible', error.issues)
         }
 
-        return data
+        return data as TDest
       }
 
       return (sources: TSource | TSource[], skipValidation?: boolean): TDest | TDest[] => {

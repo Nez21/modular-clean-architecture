@@ -16,5 +16,5 @@ export const MetadataKeys = {
     MetadataKey<(TokenFn<BasePipelineBehavior> | Class<BasePipelineBehavior> | BasePipelineBehavior)[]>(
       'UsePipelineBehaviors'
     ),
-  Schema: MetadataKey<z.AnyZodObject | z.ZodType<{ type: string }>>('Schema')
+  Schema: MetadataKey<z.ZodObject | z.ZodType<{ type: string }>>('Schema')
 } as const

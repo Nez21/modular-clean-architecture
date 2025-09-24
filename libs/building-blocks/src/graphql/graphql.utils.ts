@@ -2,41 +2,29 @@
 import type { NullableList } from '@nestjs/graphql'
 import { Field, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
 import type { GraphQLScalarType } from 'graphql'
-import { GraphQLBoolean, GraphQLFloat, GraphQLString } from 'graphql'
-import {
-  GraphQLBigInt,
-  GraphQLDateTime,
-  GraphQLEmailAddress,
-  GraphQLNegativeFloat,
-  GraphQLNegativeInt,
-  GraphQLNonNegativeFloat,
-  GraphQLNonNegativeInt,
-  GraphQLNonPositiveFloat,
-  GraphQLNonPositiveInt,
-  GraphQLPositiveFloat,
-  GraphQLPositiveInt,
-  GraphQLURL,
-  GraphQLUUID
-} from 'graphql-scalars'
+import { GraphQLBoolean, GraphQLFloat, GraphQLInt, GraphQLString } from 'graphql'
+import { GraphQLBigInt, GraphQLDateTime, GraphQLEmailAddress, GraphQLURL, GraphQLUUID } from 'graphql-scalars'
 import z from 'zod'
-import { printNode, zodToTs } from 'zod-to-ts'
 
 import { DtoUtils, traversalSchema, type IDto } from '@internal/common'
 
+// Define the GraphQL metadata type
+type GraphQLMetadata = {
+  name?: string | { input: string; output: string }
+  type?: GraphQLScalarType
+  deprecationReason?: string
+}
 declare module 'zod' {
-  interface ZodMeta {
-    graphql?: {
-      name?: string | { input: string; output: string }
-      type?: GraphQLScalarType
-      deprecationReason?: string
-    }
+  interface GlobalMeta {
+    graphql?: GraphQLMetadata
   }
 }
 
-const printZodSchema = (schema: z.ZodType) => printNode(zodToTs(schema).node)
+const printZodSchema = (schema: z.ZodType) => JSON.stringify(z.toJSONSchema(schema), undefined, 2)
 
 const getSchemaName = (schema: z.ZodType, type?: 'input' | 'output'): string => {
-  const name = schema.getMeta()?.graphql?.name
+  const metadata = schema.meta()?.graphql
+  const name = metadata?.name
 
   if (!name) {
     throw new Error(`Missing dto name. Schema:\n${printZodSchema(schema)}`)
@@ -54,7 +42,7 @@ const getSchemaName = (schema: z.ZodType, type?: 'input' | 'output'): string => 
 
 const cachedGqlTypes = new Map<string, object>()
 
-const registerZodEnumType = (schema: z.ZodEnum<NonEmptyArray<string>> | z.ZodNativeEnum<z.EnumLike>) => {
+const registerZodEnumType = (schema: z.ZodEnum) => {
   const name = getSchemaName(schema)
   const enumRef = schema.enum
   registerEnumType(enumRef, { name, description: schema.description })
@@ -68,7 +56,7 @@ const getCachedZodGqlType = (schema: z.ZodType, type?: 'input' | 'output') => {
 
   if (!cached) {
     if (schema.constructor.name === z.ZodEnum.name) {
-      return registerZodEnumType(schema as z.ZodEnum<NonEmptyArray<string>>)
+      return registerZodEnumType(schema as z.ZodEnum)
     }
 
     throw new Error(`Not registered zod gql type. Schema:\n${printZodSchema(schema)}`)
@@ -77,65 +65,26 @@ const getCachedZodGqlType = (schema: z.ZodType, type?: 'input' | 'output') => {
   return cached
 }
 
-const getNumberType = (schema: z.ZodNumber): GraphQLScalarType => {
-  if (schema.isInt) {
-    if (
-      schema._def.checks.some(
-        (check) =>
-          check.kind === 'min' && ((check.value === 0 && !check.inclusive) || (check.value == 1 && check.inclusive))
-      )
-    )
-      return GraphQLPositiveInt
-    if (
-      schema._def.checks.some(
-        (check) =>
-          check.kind === 'max' && ((check.value === 0 && !check.inclusive) || (check.value == -1 && check.inclusive))
-      )
-    )
-      return GraphQLNegativeInt
-    if (schema.minValue === 0) return GraphQLNonNegativeInt
-    if (schema.maxValue === 0) return GraphQLNonPositiveInt
-
-    return GraphQLFloat
-  }
-
-  if (
-    schema._def.checks.some(
-      (check) =>
-        check.kind === 'min' && ((check.value === 0 && !check.inclusive) || (check.value > 0 && check.inclusive))
-    )
-  )
-    return GraphQLPositiveFloat
-  if (
-    schema._def.checks.some(
-      (check) =>
-        check.kind === 'max' && ((check.value === 0 && !check.inclusive) || (check.value < 0 && check.inclusive))
-    )
-  )
-    return GraphQLNegativeFloat
-  if (schema.minValue === 0) return GraphQLNonNegativeFloat
-  if (schema.maxValue === 0) return GraphQLNonPositiveFloat
-
-  return GraphQLFloat
-}
-
-const getStringType = (schema: z.ZodString): GraphQLScalarType => {
-  if (schema.isUUID || schema.isULID) return GraphQLUUID
-  if (schema.isURL) return GraphQLURL
-  if (schema.isEmail) return GraphQLEmailAddress
-  return GraphQLString
-}
-
 const getScalarType = (schema: z.ZodType): GraphQLScalarType | Class | object => {
-  const gqlType: GraphQLScalarType | Class | object | undefined = schema.getMeta()?.graphql?.type
+  const metadata = schema.meta()?.graphql
+  const gqlType: GraphQLScalarType | Class | object | undefined = metadata?.type
 
   if (!gqlType) {
     switch (schema.constructor.name) {
       case z.ZodString.name: {
-        return getStringType(schema as z.ZodString)
+        return GraphQLString
+      }
+      case z.ZodUUID.name: {
+        return GraphQLUUID
+      }
+      case z.ZodEmail.name: {
+        return GraphQLEmailAddress
+      }
+      case z.ZodURL.name: {
+        return GraphQLURL
       }
       case z.ZodNumber.name: {
-        return getNumberType(schema as z.ZodNumber)
+        return (schema as z.ZodNumber).format?.includes('int') ? GraphQLInt : GraphQLFloat
       }
       case z.ZodBigInt.name: {
         return GraphQLBigInt
@@ -146,7 +95,6 @@ const getScalarType = (schema: z.ZodType): GraphQLScalarType | Class | object =>
       case z.ZodDate.name: {
         return GraphQLDateTime
       }
-      case z.ZodNativeEnum.name:
       case z.ZodEnum.name: {
         return getCachedZodGqlType(schema)
       }
@@ -180,7 +128,7 @@ const registerType = (target: AnyClass<IDto>, type: 'input' | 'output') => {
     const key = path.slice(0, -1).join('.')
     const field = path.at(-1)!
     const target = storage.get(key)
-    const meta = schema.getMeta()?.graphql
+    const meta = schema.meta()?.graphql
 
     if (!target) return
 

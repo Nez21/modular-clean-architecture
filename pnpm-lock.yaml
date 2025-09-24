@@ -60,8 +60,8 @@ importers:
         specifier: 2.2.1
         version: 2.2.1
       zod:
-        specifier: 3.24.4
-        version: 3.24.4
+        specifier: 4.1.11
+        version: 4.1.11
     devDependencies:
       '@eslint/js':
         specifier: ~9.26.0
@@ -287,11 +287,11 @@ importers:
         specifier: 2.8.1
         version: 2.8.1
       zod:
-        specifier: 3.24.4
-        version: 3.24.4
+        specifier: 4.1.11
+        version: 4.1.11
       zod-to-ts:
         specifier: 1.2.0
-        version: 1.2.0(typescript@5.8.2)(zod@3.24.4)
+        version: 1.2.0(typescript@5.8.2)(zod@4.1.11)
     devDependencies:
       '@types/ms':
         specifier: ^2.1.0
@@ -324,20 +324,8 @@ importers:
         specifier: 2.8.1
         version: 2.8.1
       zod:
-        specifier: 3.24.4
-        version: 3.24.4
-
-  libs/contracts/shared:
-    dependencies:
-      tslib:
-        specifier: 2.8.1
-        version: 2.8.1
-
-  libs/contracts/user:
-    dependencies:
-      tslib:
-        specifier: 2.8.1
-        version: 2.8.1
+        specifier: 4.1.11
+        version: 4.1.11
 
   libs/modules/localization:
     dependencies:
@@ -366,8 +354,8 @@ importers:
         specifier: 2.8.1
         version: 2.8.1
       zod:
-        specifier: 3.24.4
-        version: 3.24.4
+        specifier: 4.1.11
+        version: 4.1.11
 
 packages:
 
@@ -14157,15 +14145,20 @@ packages:
       zod: 3.24.4
     dev: true
 
-  /zod-to-ts@1.2.0(typescript@5.8.2)(zod@3.24.4):
+  /zod-to-ts@1.2.0(typescript@5.8.2)(zod@4.1.11):
     resolution: {integrity: sha512-x30XE43V+InwGpvTySRNz9kB7qFU8DlyEy7BsSTCHPH1R0QasMmHWZDCzYm6bVXtj/9NNJAZF3jW8rzFvH5OFA==}
     peerDependencies:
       typescript: ^4.9.4 || ^5.0.2
       zod: ^3
     dependencies:
       typescript: 5.8.2
-      zod: 3.24.4
+      zod: 4.1.11
     dev: false
 
   /zod@3.24.4:
     resolution: {integrity: sha512-OdqJE9UDRPwWsrHjLN2F8bPxvwJBK22EHLWtanu0LSYr5YqzsaaW3RMgmjwr8Rypg5k+meEJdSPXJZXE/yqOMg==}
+    dev: true
+
+  /zod@4.1.11:
+    resolution: {integrity: sha512-WPsqwxITS2tzx1bzhIKsEs19ABD5vmCVa4xBo2tq/SrV4RNZtfws1EnCWQXM6yh8bD08a1idvkB5MZSBiZsjwg==}
+    dev: false

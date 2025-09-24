@@ -6,7 +6,7 @@ import { Entity, EntityUtils } from './entity.type'
 
 describe('Entity Type', () => {
   const testEntitySchema = z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string().min(2).max(64),
     age: z.number().int().min(0),
     active: z.boolean().default(true),
@@ -167,7 +167,7 @@ describe('Entity Type', () => {
 
     it('should handle very complex schema', () => {
       const complexSchema = z.object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         metadata: z.object({
           created: z.date(),
           nested: z.object({

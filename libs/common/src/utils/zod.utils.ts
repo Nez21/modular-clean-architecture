@@ -1,7 +1,7 @@
 import z from 'zod'
 
 export const traversalSchema = (
-  schema: z.AnyZodObject,
+  schema: z.ZodObject,
   handler: (
     schema: z.ZodType,
     path: string[],
@@ -32,11 +32,12 @@ export const traversalSchema = (
     }
 
     if (schema.constructor.name === z.ZodDefault.name) {
-      recurse(
-        (schema as z.ZodDefault<z.ZodType>)._def.innerType,
-        { ...attributes, defaultValue: (schema as z.ZodDefault<z.ZodType>)._def.defaultValue() as unknown },
-        path
-      )
+      const defaultSchema = schema as z.ZodDefault<z.ZodType>
+      const defaultValue: unknown =
+        typeof defaultSchema.def.defaultValue === 'function'
+          ? defaultSchema.def.defaultValue()
+          : defaultSchema.def.defaultValue
+      recurse(defaultSchema.def.innerType, { ...attributes, defaultValue }, path)
       return
     }
 
@@ -46,7 +47,7 @@ export const traversalSchema = (
 
     if (schema.constructor.name === z.ZodObject.name) {
       for (const [key, value] of Object.entries<z.ZodType>(
-        (schema as z.AnyZodObject).shape as Record<string, z.ZodType>
+        (schema as z.ZodObject).shape as Record<string, z.ZodType>
       )) {
         recurse(value, { nullable: false, array: false, arrayNullable: false }, [...path, key])
       }

@@ -10,12 +10,6 @@
       "path": "./libs/building-blocks"
     },
     {
-      "path": "./libs/contracts/shared"
-    },
-    {
-      "path": "./libs/contracts/user"
-    },
-    {
       "path": "./libs/modules/user"
     },
     {

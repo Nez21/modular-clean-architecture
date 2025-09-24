@@ -16,7 +16,7 @@ class TestCommandDto extends Dto(
   z.object({
     name: z.string().min(3).max(50),
     age: z.number().int().min(0).max(120),
-    email: z.string().email(),
+    email: z.email(),
     isActive: z.boolean().optional(),
     tags: z.array(z.string()).min(1).max(5)
   }),
@@ -93,7 +93,9 @@ describe('ValidationBehavior', () => {
           issues: expect.arrayContaining([
             expect.objectContaining({
               path: ['name'],
-              message: expect.stringContaining('String must contain at least 3 character(s)')
+              code: 'too_small',
+              minimum: 3,
+              inclusive: true
             })
           ])
         })
@@ -116,7 +118,9 @@ describe('ValidationBehavior', () => {
           issues: expect.arrayContaining([
             expect.objectContaining({
               path: ['age'],
-              message: expect.stringContaining('Number must be greater than or equal to 0')
+              code: 'too_small',
+              minimum: 0,
+              inclusive: true
             })
           ])
         })
@@ -139,7 +143,8 @@ describe('ValidationBehavior', () => {
           issues: expect.arrayContaining([
             expect.objectContaining({
               path: ['email'],
-              message: expect.stringContaining('email')
+              code: 'invalid_format',
+              format: 'email'
             })
           ])
         })
@@ -162,7 +167,9 @@ describe('ValidationBehavior', () => {
           issues: expect.arrayContaining([
             expect.objectContaining({
               path: ['tags'],
-              message: expect.stringContaining('Array must contain at most 5 element(s)')
+              code: 'too_big',
+              maximum: 5,
+              inclusive: true
             })
           ])
         })
@@ -185,7 +192,9 @@ describe('ValidationBehavior', () => {
           issues: expect.arrayContaining([
             expect.objectContaining({
               path: ['tags'],
-              message: expect.stringContaining('Array must contain at least 1 element(s)')
+              code: 'too_small',
+              minimum: 1,
+              inclusive: true
             })
           ])
         })
@@ -228,7 +237,7 @@ describe('ValidationBehavior', () => {
         z.object({
           name: z.string().optional(),
           age: z.number().optional(),
-          email: z.string().email().optional()
+          email: z.email().optional()
         }),
         BaseCommand
       ) {}

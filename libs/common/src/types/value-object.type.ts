@@ -7,10 +7,10 @@ const Schema = Symbol('Schema')
 const MetadataKeys = {
   TypeId: MetadataKey<UUID>('TypeId'),
   IsValueObject: MetadataKey<boolean>('IsValueObject'),
-  Schema: MetadataKey<z.AnyZodObject>(Schema)
+  Schema: MetadataKey<z.ZodObject>(Schema)
 } as const
 
-export interface IValueObject<TSchema extends z.AnyZodObject = z.AnyZodObject> {
+export interface IValueObject<TSchema extends z.ZodObject = z.ZodObject<Record<string, z.ZodType<any>>>> {
   [Schema]?: TSchema
 
   validate(): void
@@ -19,9 +19,9 @@ export interface IValueObject<TSchema extends z.AnyZodObject = z.AnyZodObject> {
 }
 
 export type ValueObjectSchemaOf<T extends IValueObject> = NonNullable<T[typeof Schema]>
-export type ValueObjectType<TSchema extends z.AnyZodObject> = IValueObject<TSchema> & DeepReadonly<z.output<TSchema>>
+export type ValueObjectType<TSchema extends z.ZodObject> = IValueObject<TSchema> & DeepReadonly<z.output<TSchema>>
 
-export function ValueObject<TSchema extends z.AnyZodObject>(schema: TSchema) {
+export function ValueObject<TSchema extends z.ZodObject>(schema: TSchema) {
   const typeId = randomUUID()
 
   @SetTypedMetadata(MetadataKeys.TypeId, typeId)

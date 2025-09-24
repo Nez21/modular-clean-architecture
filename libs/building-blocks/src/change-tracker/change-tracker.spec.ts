@@ -11,7 +11,7 @@ import { ChangeTracker } from './change-tracker'
 
 class TestEntity extends Entity(
   z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string().min(1),
     status: z.enum(['active', 'inactive', 'pending']),
     metadata: z

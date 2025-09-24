@@ -8,10 +8,10 @@ const Schema = Symbol('Schema')
 const MetadataKeys = {
   TypeId: MetadataKey<UUID>('TypeId'),
   IsDto: MetadataKey<boolean>('IsDto'),
-  Schema: MetadataKey<z.AnyZodObject>(Schema)
+  Schema: MetadataKey<z.ZodObject>(Schema)
 } as const
 
-export interface IDto<TSchema extends z.AnyZodObject = z.AnyZodObject> {
+export interface IDto<TSchema extends z.ZodObject = z.ZodObject<Record<string, z.ZodType<any>>>> {
   [Schema]?: TSchema
 
   validate(): void
@@ -20,7 +20,7 @@ export interface IDto<TSchema extends z.AnyZodObject = z.AnyZodObject> {
 
 export type DtoSchemaOf<T extends IDto> = NonNullable<T[typeof Schema]>
 
-export function Dto<TSchema extends z.AnyZodObject, TBase extends object>(
+export function Dto<TSchema extends z.ZodObject, TBase extends object>(
   schema: TSchema,
   baseClass?: AbstractClass<TBase>
 ) {

@@ -6,7 +6,7 @@ export type UserId = Branded<string, 'UserId'>
 
 export class User extends Entity(
   z.object({
-    id: z.string().uuid().brand<UserId>(),
+    id: z.uuid().brand<UserId>(),
     name: z.string().min(2).max(64),
     email: z.string().email().max(64),
     gender: z

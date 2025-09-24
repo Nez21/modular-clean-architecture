@@ -1,9 +1,11 @@
-export interface IRequestContextService {
+import { Token } from '@internal/common'
+
+export interface IRequestContext {
   get tenantId(): string
-  get userId(): string
-  get sessionId(): string
-  get correlationId(): string
-  get idempotentKey(): string
 }
 
-export const IRequestContextService = Symbol('IRequestContextService')
+export interface IRequestContextService {
+  get current(): IRequestContext
+}
+
+export const IRequestContextService = Token<IRequestContextService>('IRequestContextService')

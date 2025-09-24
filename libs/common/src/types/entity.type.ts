@@ -8,11 +8,11 @@ const KeyAttributes = Symbol('KeyAttributes')
 const MetadataKeys = {
   TypeId: MetadataKey<UUID>('TypeId'),
   IsEntity: MetadataKey<boolean>('IsEntity'),
-  Schema: MetadataKey<z.AnyZodObject>(Schema),
+  Schema: MetadataKey<z.ZodObject>(Schema),
   KeyAttributes: MetadataKey<string[]>(KeyAttributes)
 } as const
 
-export interface IEntity<TSchema extends z.AnyZodObject = z.AnyZodObject, TKeyAttributes extends string[] = string[]> {
+export interface IEntity<TSchema extends z.ZodObject = z.ZodObject, TKeyAttributes extends string[] = string[]> {
   readonly [Schema]?: TSchema
   readonly [KeyAttributes]?: TKeyAttributes
 
@@ -28,7 +28,7 @@ export type KeyOf<T extends IEntity> = {
   [TKey in KeyAttributesOf<T>[number] as TKey extends keyof T ? TKey : never]: TKey extends keyof T ? T[TKey] : never
 }
 export type EntityType<
-  TSchema extends z.AnyZodObject = z.AnyZodObject,
+  TSchema extends z.ZodObject = z.ZodObject<Record<string, z.ZodType<any>>>,
   TKeyAttributes extends string[] = string[]
 > = IEntity<TSchema, TKeyAttributes> & DeepReadonly<z.output<TSchema>> & ProtectedData<z.output<TSchema>>
 
@@ -37,7 +37,7 @@ export class ProtectedData<T> {
 }
 
 export function Entity<
-  TSchema extends z.AnyZodObject,
+  TSchema extends z.ZodObject,
   TKeyAttributes extends NonEmptyArray<ObjectStringKeys<z.output<TSchema>, boolean | Date | number | string>>
 >(schema: TSchema, keyAttributes: TKeyAttributes) {
   if (keyAttributes.length === 0) {
@@ -76,7 +76,7 @@ export function Entity<
     }
 
     equals<T extends IEntity>(this: T, other: T): boolean {
-      return keyAttributes.every((key) => this[key] === other[key])
+      return keyAttributes.every((key) => (this as Record<string, any>)[key] === (other as Record<string, any>)[key])
     }
 
     toJSON(): string {
@@ -84,7 +84,7 @@ export function Entity<
     }
   }
 
-  for (const prop of Object.keys((schema as z.AnyZodObject).shape as Record<keyof z.output<TSchema>, z.ZodType>)) {
+  for (const prop of Object.keys((schema as z.ZodObject).shape as Record<keyof z.output<TSchema>, z.ZodType>)) {
     Object.defineProperty(BaseEntity.prototype, prop, {
       get: function () {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access

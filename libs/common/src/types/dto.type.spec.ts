@@ -4,7 +4,7 @@ import { Dto } from './dto.type'
 
 describe('Dto Type', () => {
   const testDtoSchema = z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     name: z.string().min(2).max(64),
     age: z.number().int().min(0),
     active: z.boolean().default(true),
@@ -114,7 +114,7 @@ describe('Dto Type', () => {
   describe('Dto Type Safety', () => {
     it('should maintain type safety with complex schemas', () => {
       const complexSchema = z.object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         nested: z.object({
           value: z.number(),
           array: z.array(

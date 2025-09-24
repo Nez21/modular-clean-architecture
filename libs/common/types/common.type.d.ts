@@ -64,3 +64,5 @@ type IsBothArrayOrNeither<T1, T2> = T1 extends { length: number }
 type NonEmptyArray<T> = [T, ...T[]]
 
 type CustomInstanceType<T> = T extends Class<infer R>[] ? R[] : T extends Class<infer R> ? R : never
+
+type Action<T> = (() => Promise<T>) | (() => T)
