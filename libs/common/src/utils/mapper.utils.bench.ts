@@ -32,12 +32,20 @@ describe('Mapper Utils Benchmarks', () => {
       email: 'john.doe@example.com'
     }
 
-    bench('zod parsing', () => {
-      sourceSchema.safeParse(sourceData)
-    })
-
     bench('mapping', () => {
       mapper(sourceData)
+    })
+
+    bench('raw mapping', () => {
+      const source = sourceSchema.parse(sourceData)
+
+      const destData = {
+        fullName: `${source.firstName} ${source.lastName}`,
+        age: source.age,
+        email: source.email
+      }
+
+      destSchema.parse(destData)
     })
   })
 
@@ -141,12 +149,28 @@ describe('Mapper Utils Benchmarks', () => {
       }
     }
 
-    bench('zod parsing', () => {
-      sourceSchema.safeParse(sourceData)
-    })
-
     bench('mapping', () => {
       mapper(sourceData)
+    })
+
+    bench('raw mapping', () => {
+      const source = sourceSchema.parse(sourceData)
+
+      const destData = {
+        name: `${source.user.firstName} ${source.user.lastName}`,
+        contactInfo: {
+          emailAddress: source.user.contact.email,
+          phoneNumber: source.user.contact.phone,
+          location: {
+            fullAddress: `${source.user.address.street}, ${source.user.address.city}`,
+            postalCode: source.user.address.zip
+          }
+        },
+        settings: source.user.preferences,
+        additionalData: source.metadata
+      }
+
+      destSchema.parse(destData)
     })
   })
 })

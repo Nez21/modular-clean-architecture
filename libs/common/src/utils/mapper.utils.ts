@@ -46,6 +46,12 @@ type GetPropertySchema<TSchema extends z.ZodObject<z.ZodRawShape>, TKey> = TKey 
       : never
   : never
 
+type MapFunction<TSourceSchema extends z.ZodObject<z.ZodRawShape>, TDestSchema extends z.ZodObject<z.ZodRawShape>> = <
+  T
+>(
+  source: T
+) => T extends z.input<TSourceSchema>[] ? z.output<TDestSchema>[] : z.output<TDestSchema>
+
 export interface MapperBuilder<
   TSourceSchema extends z.ZodObject<z.ZodRawShape>,
   TDestSchema extends z.ZodObject<z.ZodRawShape>,
@@ -84,11 +90,9 @@ export interface MapperBuilder<
     TMapped | Record<TDestKey, z.input<TDestSchema>[TDestKey]>
   >
 
-  build(): UnionToIntersection<TMapped> extends z.input<TDestSchema>
-    ? <T extends z.input<TSourceSchema> | z.input<TSourceSchema>[]>(
-        source: T
-      ) => T extends z.input<TSourceSchema>[] ? z.output<TDestSchema>[] : z.output<TDestSchema>
-    : MapperError & ErrorMessage<'Source and destination schemas are not compatible'>
+  build: UnionToIntersection<TMapped> extends z.input<TDestSchema>
+    ? () => MapFunction<TSourceSchema, TDestSchema>
+    : { error: ErrorMessage<'Source and destination schemas are not compatible'> }
 }
 
 const createProxy = <T>() => {
