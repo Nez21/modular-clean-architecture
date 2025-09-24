@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common'
-import type { Observable } from 'rxjs'
-
 import type { TokenFn } from '@internal/common'
 import { SetTypedMetadata } from '@internal/common'
 
+import { Injectable } from '@nestjs/common'
+import type { Observable } from 'rxjs'
+
 import type { BaseCommand, ICommandHandler } from './command.interface'
-import type { IEventHandler, BaseEvent } from './event.interface'
+import type { BaseEvent, IEventHandler } from './event.interface'
 import { MetadataKeys } from './mediator.const'
-import type { IQueryHandler, BaseQuery } from './query.interface'
+import type { BaseQuery, IQueryHandler } from './query.interface'
 
 export class PipelineBehaviorContext<THandler extends ICommandHandler | IQueryHandler | IEventHandler> {
   readonly class: Class<THandler>

@@ -2,7 +2,8 @@ import { randomUUID, UUID } from 'node:crypto'
 
 import { z } from 'zod'
 
-import { DeepReadonly, getTypedMetadata, MetadataKey, serialize, SetTypedMetadata } from '#/utils'
+import { DeepReadonly, getTypedMetadata, MetadataKey, SetTypedMetadata, serialize } from '#/utils'
+
 const Schema = Symbol('Schema')
 const KeyAttributes = Symbol('KeyAttributes')
 const MetadataKeys = {
@@ -87,7 +88,6 @@ export function Entity<
   for (const prop of Object.keys((schema as z.ZodObject).shape as Record<keyof z.output<TSchema>, z.ZodType>)) {
     Object.defineProperty(BaseEntity.prototype, prop, {
       get: function () {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
         return this.data[prop]
       }
     })

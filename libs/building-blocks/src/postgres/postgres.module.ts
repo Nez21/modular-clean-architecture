@@ -1,13 +1,12 @@
+import type { TokenFn, TypedProvider } from '@internal/common'
+
 import type { DynamicModule, InjectionToken } from '@nestjs/common'
 import { Logger } from '@nestjs/common'
 import type { DrizzleConfig } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { drizzle } from 'drizzle-orm/node-postgres'
 import { Pool } from 'pg'
-
 import { kebabCase } from 'string-ts'
-
-import type { TokenFn, TypedProvider } from '@internal/common'
 
 import { ChangeTrackerModule } from '#/change-tracker'
 import { HealthService } from '#/health'

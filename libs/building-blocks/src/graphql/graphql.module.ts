@@ -4,9 +4,8 @@ import type { ApolloServerPlugin } from '@apollo/server'
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
 import type { ApolloDriverConfig } from '@nestjs/apollo'
 import { ApolloDriver } from '@nestjs/apollo'
-import { Logger, type DynamicModule } from '@nestjs/common'
+import { type DynamicModule, Logger } from '@nestjs/common'
 import { GraphQLModule } from '@nestjs/graphql'
-
 import ms from 'ms'
 
 import type { CacheKey } from '#/cache'

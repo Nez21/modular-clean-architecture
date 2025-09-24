@@ -1,6 +1,6 @@
-import type { DynamicModule } from '@nestjs/common'
-
 import { Handler, type RestateContext, RestateService } from '@internal/building-blocks/restate'
+
+import type { DynamicModule } from '@nestjs/common'
 
 import type { PostgresDataModuleOptions } from './data/postgres'
 import { PostgresDataModule } from './data/postgres'

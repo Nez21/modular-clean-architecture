@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/require-await */
-import { of, throwError, type Observable } from 'rxjs'
+import { type Observable, of, throwError } from 'rxjs'
 
 import { PipelineFunction, pipelineMetadataKey, wrapPipeline } from './resilience.utils'
 

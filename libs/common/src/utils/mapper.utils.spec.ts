@@ -243,11 +243,11 @@ describe('Mapper Utils', () => {
         (m) =>
           m
             .forMember(
-              (d) => d['itemValue'],
+              (d) => d.itemValue,
               (s) => s.value
             )
             .forMember(
-              (d) => d['itemId'],
+              (d) => d.itemId,
               (s) => s.id
             )
             .build()

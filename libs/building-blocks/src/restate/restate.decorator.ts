@@ -1,9 +1,9 @@
-import { SetMetadata } from '@nestjs/common'
-
 import { SetTypedMetadata } from '@internal/common'
 
+import { SetMetadata } from '@nestjs/common'
+
 import { MetadataKeys } from './restate.const'
-import type { IRestateWorkflow, IRestateHandler, IRestateSharedHandler, ServiceMetadata } from './restate.interface'
+import type { IRestateHandler, IRestateSharedHandler, IRestateWorkflow, ServiceMetadata } from './restate.interface'
 
 export const RestateService = (name: string, options?: Omit<ServiceMetadata, 'name'>): ClassDecorator =>
   SetTypedMetadata(MetadataKeys.Service, { name, ...options })

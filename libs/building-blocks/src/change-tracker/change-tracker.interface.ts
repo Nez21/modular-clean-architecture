@@ -1,5 +1,5 @@
+import type { Diff, EntityType, IEntity, KeyOf } from '@internal/common'
 import { Token } from '@internal/common'
-import type { IEntity, KeyOf, Diff, EntityType } from '@internal/common'
 
 export interface IChangeTracker {
   attach(entity: EntityType): boolean

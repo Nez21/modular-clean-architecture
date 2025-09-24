@@ -1,8 +1,7 @@
 import { z } from 'zod'
 
-import type { DeepReadonly } from '../utils'
-
 import { ValueObject, ValueObjectUtils } from './value-object.type'
+import type { DeepReadonly } from '../utils'
 
 describe('ValueObject', () => {
   const AddressSchema = z.object({
@@ -95,7 +94,7 @@ describe('ValueObject', () => {
       expect(Object.isFrozen(address)).toBe(true)
 
       expect(() => {
-        // @ts-expect-error
+        // @ts-ignore
         address.street = 'New Street'
       }).toThrow()
     })
@@ -123,12 +122,12 @@ describe('ValueObject', () => {
       expect(Object.isFrozen(person.metadata)).toBe(true)
 
       expect(() => {
-        // @ts-expect-error
+        // @ts-ignore
         person.addresses[0].street = 'New Street'
       }).toThrow()
 
       expect(() => {
-        // @ts-expect-error
+        // @ts-ignore
         person.metadata.notes = {}
       }).toThrow()
     })
@@ -186,13 +185,13 @@ describe('ValueObject', () => {
   describe('Negative tests', () => {
     it('should throw error when creating with invalid data', () => {
       expect(() => {
-        // @ts-expect-error
+        // @ts-ignore
         Address.create({})
       }).toThrow()
 
       expect(() => {
         Address.create({
-          // @ts-expect-error
+          // @ts-ignore
           street: 123,
           city: 'City',
           zipCode: '12345',
@@ -209,7 +208,6 @@ describe('ValueObject', () => {
         country: 'Country'
       })
 
-      // eslint-disable-next-line @typescript-eslint/no-misused-spread
       const corruptedAddress = { ...address, _street: 123 }
 
       expect(() => {

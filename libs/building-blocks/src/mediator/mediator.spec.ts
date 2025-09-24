@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/no-useless-undefined */
 import type { CallHandler } from '@nestjs/common'
 import type { TestingModule } from '@nestjs/testing'
 import { Test } from '@nestjs/testing'
@@ -62,7 +61,10 @@ class UnregisteredQuery extends BaseQuery {}
 
 class TestQueryHandler extends QueryHandler(TestQuery) {
   handle(query: TestQuery): Promise<{ id: number; data: string }> {
-    return Promise.resolve({ id: query.id, data: `Query result for ID: ${String(query.id)}` })
+    return Promise.resolve({
+      id: query.id,
+      data: `Query result for ID: ${String(query.id)}`
+    })
   }
 }
 

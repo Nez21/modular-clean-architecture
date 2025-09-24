@@ -1,6 +1,6 @@
-import { type Observable } from 'rxjs'
-
 import { DtoUtils } from '@internal/common'
+
+import { type Observable } from 'rxjs'
 
 import type { CallHandler, PipelineBehaviorInput } from '../pipeline-behavior.interface'
 import { BasePipelineBehavior } from '../pipeline-behavior.interface'

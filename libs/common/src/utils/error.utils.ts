@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 type ResultType<T> = { success: true; result: T } | { success: false; error: unknown }
 
 export const catchError = <T>(fn: () => T): T extends Promise<infer U> ? Promise<ResultType<U>> : ResultType<T> => {

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
+  "extends": "//",
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noExplicitAny": "off",
+        "noConfusingVoidType": "off",
+        "noTsIgnore": "off"
+      },
+      "complexity": {
+        "noBannedTypes": "off",
+        "useLiteralKeys": "off",
+        "noThisInStatic": "off"
+      },
+      "style": {
+        "noNonNullAssertion": "off",
+        "useShorthandFunctionType": "off"
+      }
+    }
+  },
+  "root": false
+}

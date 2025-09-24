@@ -1,6 +1,6 @@
-import z from 'zod'
-
 import { ValueObject } from '@internal/common'
+
+import z from 'zod'
 
 export class Address extends ValueObject(
   z.object({

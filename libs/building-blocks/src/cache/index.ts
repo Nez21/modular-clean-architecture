@@ -1,3 +1,3 @@
-export * from './cache.service.interface'
-export * from './cache.module.types'
 export * from './cache.module'
+export * from './cache.module.types'
+export * from './cache.service.interface'

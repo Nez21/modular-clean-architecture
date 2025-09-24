@@ -1,6 +1,4 @@
-import { pgEnum } from 'drizzle-orm/pg-core'
-import { uuid } from 'drizzle-orm/pg-core'
-import { pgTable, text } from 'drizzle-orm/pg-core'
+import { pgEnum, pgTable, text, uuid } from 'drizzle-orm/pg-core'
 
 export const gender = pgEnum('Gender', ['Male', 'Female', 'Other'])
 

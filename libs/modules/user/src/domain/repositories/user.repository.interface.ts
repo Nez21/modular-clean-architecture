@@ -1,5 +1,9 @@
 import { Token } from '@internal/common'
 
-export interface IUserRepository {}
+import type { User } from '../entities'
+
+export interface IUserRepository {
+  findAll(): Promise<User[]>
+}
 
 export const IUserRepository = Token<IUserRepository>('IUserRepository')

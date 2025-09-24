@@ -23,7 +23,7 @@ export const UseRetry = (options?: Partial<RetryOptions>): TypedDecorator => {
       retry({
         count: retryOptions.count,
         resetOnSuccess: true,
-        delay: (_error, times) => timer(Math.pow(2, times - 1) * ms(retryOptions.baseDelay))
+        delay: (_error, times) => timer(2 ** (times - 1) * ms(retryOptions.baseDelay))
       })
     )
   ) as TypedDecorator

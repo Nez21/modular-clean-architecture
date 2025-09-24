@@ -1,11 +1,11 @@
+import { TokenFn } from '@internal/common'
+
 import { DiscoveryService } from '@golevelup/nestjs-discovery'
 import { CallHandler, Inject, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
-import { Observable, defer, lastValueFrom, mergeAll } from 'rxjs'
+import { defer, lastValueFrom, mergeAll, Observable } from 'rxjs'
 
-import { TokenFn } from '@internal/common'
-
-import { BaseCommand, ICommandHandler, CommandResultOf } from './command.interface'
+import { BaseCommand, CommandResultOf, ICommandHandler } from './command.interface'
 import { BaseEvent, IEventHandler } from './event.interface'
 import { MetadataKeys } from './mediator.const'
 import { IMediator } from './mediator.interface'

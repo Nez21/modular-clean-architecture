@@ -1,9 +1,9 @@
+import { Dto } from '@internal/common'
+
 import { NestFactory } from '@nestjs/core'
 import { GraphQLSchemaBuilderModule, GraphQLSchemaFactory, Query } from '@nestjs/graphql'
 import { printSchema } from 'graphql'
 import z from 'zod'
-
-import { Dto } from '@internal/common'
 
 import { registerInputType, registerOutputType } from './graphql.utils'
 

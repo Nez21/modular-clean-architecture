@@ -1,6 +1,6 @@
-import type { DynamicModule } from '@nestjs/common'
-
 import { PostgresModule } from '@internal/building-blocks/postgres'
+
+import type { DynamicModule } from '@nestjs/common'
 
 import { IUserRepository } from '#/domain/repositories'
 

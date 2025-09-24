@@ -1,7 +1,7 @@
 import type { CamelCase, PascalCase, SnakeCase, TitleCase } from 'string-ts'
-import { camelCase, snakeCase, pascalCase, titleCase } from 'string-ts'
-import { z } from 'zod'
+import { camelCase, pascalCase, snakeCase, titleCase } from 'string-ts'
 import type { core as zCore } from 'zod'
+import { z } from 'zod'
 
 export type NameConvention = 'camelCase' | 'snakeCase' | 'pascalCase' | 'titleCase' | 'none'
 
@@ -34,7 +34,7 @@ export class MapperError extends z.ZodError {
   }
 
   override get message(): string {
-    return this.baseMessage + '\n' + super.message
+    return `${this.baseMessage}\n${super.message}`
   }
 }
 
@@ -112,9 +112,7 @@ const createProxy = <T>() => {
 }
 
 const getPropertySchema = (schema: z.ZodObject, key: string) => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   let propSchema = schema.shape[key]
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   propSchema = propSchema instanceof z.ZodArray ? propSchema.element : propSchema
 
   if (!(propSchema instanceof z.ZodObject)) {
@@ -183,7 +181,6 @@ export function createMapper<
           processedMappings.push({
             destKey: destProxy.property[0],
             sourceKey: sourceProxy.property[0],
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             mapper: mapping.mapper(
               createMapper(
                 getPropertySchema(sourceSchema, sourceProxy.property[0]),
@@ -220,7 +217,6 @@ export function createMapper<
           evalScript += `result['${processedMapping.destKey}'] = sourceValueSelectors[${String(sourceValueSelectors.length)}](sourceWithDefaults)\n`
           sourceValueSelectors.push(processedMapping.sourceValueSelector)
         } else {
-          // eslint-disable-next-line sonarjs/no-nested-template-literals
           evalScript += `result['${processedMapping.destKey}'] = mappers[${String(mappers.length)}](sourceWithDefaults${processedMapping.sourceKey ? `['${processedMapping.sourceKey}']` : ''}, true)\n`
           mappers.push(processedMapping.mapper)
         }
@@ -228,7 +224,6 @@ export function createMapper<
 
       evalScript += `return result`
 
-      // eslint-disable-next-line @typescript-eslint/no-implied-eval, sonarjs/code-eval
       const optimizedMapMembers = new Function('sourceWithDefaults', 'sourceValueSelectors', 'mappers', evalScript) as (
         sourceWithDefaults: TSource,
         sourceValueSelectors: AnyFunction[],

@@ -35,7 +35,6 @@ export function Dto<TSchema extends z.ZodObject, TBase extends object>(
   @SetTypedMetadata(MetadataKeys.Schema, schema)
   abstract class BaseDto extends (baseClass as AbstractClass) implements IDto<TSchema> {
     protected constructor() {
-      // eslint-disable-next-line sonarjs/super-invocation
       super()
     }
 

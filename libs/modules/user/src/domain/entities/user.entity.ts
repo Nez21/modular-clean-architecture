@@ -1,6 +1,6 @@
-import { z } from 'zod'
-
 import { Entity } from '@internal/common'
+
+import { z } from 'zod'
 
 export type UserId = Branded<string, 'UserId'>
 

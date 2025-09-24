@@ -1,5 +1,4 @@
 import { type DynamicModule } from '@nestjs/common'
-
 import { GlideClient } from '@valkey/valkey-glide'
 
 import { HealthModule, HealthService } from '#/health'

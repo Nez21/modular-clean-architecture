@@ -2,7 +2,9 @@ import type { CustomDecorator } from '@nestjs/common'
 
 type MetadataType = string | number | object | boolean | undefined
 
-export type MetadataKey<TType extends MetadataType> = symbol & { __type: TType }
+export type MetadataKey<TType extends MetadataType> = symbol & {
+  __type: TType
+}
 
 export const MetadataKey = <TType extends MetadataType>(nameOrSymbol: string | symbol) =>
   (typeof nameOrSymbol === 'symbol' ? nameOrSymbol : Symbol(nameOrSymbol)) as IfEquals<
@@ -49,6 +51,5 @@ export const getTypedMetadata = <K extends MetadataKey<any>, T extends boolean =
     throw new Error(`Metadata ${key.toString()} not found`)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return value as IfEquals<T, true, K['__type'], K['__type'] | undefined>
 }

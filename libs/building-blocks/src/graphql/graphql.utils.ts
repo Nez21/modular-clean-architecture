@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { DtoUtils, type IDto, traversalSchema } from '@internal/common'
+
 import type { NullableList } from '@nestjs/graphql'
 import { Field, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
 import type { GraphQLScalarType } from 'graphql'
 import { GraphQLBoolean, GraphQLFloat, GraphQLInt, GraphQLString } from 'graphql'
 import { GraphQLBigInt, GraphQLDateTime, GraphQLEmailAddress, GraphQLURL, GraphQLUUID } from 'graphql-scalars'
 import z from 'zod'
-
-import { DtoUtils, traversalSchema, type IDto } from '@internal/common'
 
 // Define the GraphQL metadata type
 type GraphQLMetadata = {

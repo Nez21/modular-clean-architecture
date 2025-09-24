@@ -1,6 +1,6 @@
 import { Token } from '@internal/common'
 
-import type { CommandResultOf, BaseCommand } from './command.interface'
+import type { BaseCommand, CommandResultOf } from './command.interface'
 import type { BaseEvent } from './event.interface'
 import type { BaseQuery, QueryResultOf } from './query.interface'
 

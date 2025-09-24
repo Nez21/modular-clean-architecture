@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/require-await */
 import type { TestingModule } from '@nestjs/testing'
 import { Test } from '@nestjs/testing'
-import { ValkeyContainer, type StartedValkeyContainer } from '@testcontainers/valkey'
+import { type StartedValkeyContainer, ValkeyContainer } from '@testcontainers/valkey'
 import { GlideClient } from '@valkey/valkey-glide'
-
 import ms from 'ms'
 
 import { CacheModuleOptions } from './cache.module.types'

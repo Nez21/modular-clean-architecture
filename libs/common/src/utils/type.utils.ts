@@ -2,7 +2,7 @@ export const isPlainObject = (value: unknown): value is AnyObject =>
   !!value && typeof value === 'object' && value.constructor === Object
 
 export const isPromise = <T>(value: T | Promise<T>): value is Promise<T> =>
-  !!value && typeof value == 'object' && (value instanceof Promise || 'then' in value)
+  !!value && typeof value === 'object' && (value instanceof Promise || 'then' in value)
 
 export const isNil = (value: unknown): value is null | undefined => value === null || value === undefined
 

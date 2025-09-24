@@ -1,30 +1,29 @@
-import { DiscoveryModule, DiscoveryService } from '@golevelup/nestjs-discovery'
-import { Inject, Logger, type DynamicModule, type OnApplicationBootstrap } from '@nestjs/common'
+import { Token } from '@internal/common'
 
+import { DiscoveryModule, DiscoveryService } from '@golevelup/nestjs-discovery'
+import { type DynamicModule, Inject, Logger, type OnApplicationBootstrap } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
 import {
+  Context,
   endpoint,
-  service,
-  object,
   handlers,
-  workflow,
+  ObjectContext,
+  ObjectSharedContext,
+  object,
+  service,
   WorkflowContext,
   WorkflowSharedContext,
-  Context,
-  ObjectContext,
-  ObjectSharedContext
+  workflow
 } from '@restatedev/restate-sdk'
 import { connect } from '@restatedev/restate-sdk-clients'
 
-import { Token } from '@internal/common'
-
 import { MetadataKeys } from './restate.const'
 import {
-  IRestateHandler,
   IRestateClient,
+  IRestateHandler,
   IRestateSharedHandler,
-  ServiceMetadata,
   ObjectMetadata,
+  ServiceMetadata,
   WorkflowMetadata
 } from './restate.interface'
 

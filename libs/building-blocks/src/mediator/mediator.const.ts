@@ -1,7 +1,7 @@
-import type z from 'zod'
-
 import type { TokenFn } from '@internal/common'
 import { MetadataKey } from '@internal/common'
+
+import type z from 'zod'
 
 import type { BaseCommand } from './command.interface'
 import type { BaseEvent } from './event.interface'

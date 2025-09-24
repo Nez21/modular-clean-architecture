@@ -1,6 +1,6 @@
-import type ms from 'ms'
-
 import { Token } from '@internal/common'
+
+import type ms from 'ms'
 
 export interface CacheModuleOptions {
   connectionString: string

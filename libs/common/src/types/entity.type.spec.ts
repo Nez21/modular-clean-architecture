@@ -1,8 +1,7 @@
 import { z } from 'zod'
 
-import { deserialize } from '../utils'
-
 import { Entity, EntityUtils } from './entity.type'
+import { deserialize } from '../utils'
 
 describe('Entity Type', () => {
   const testEntitySchema = z.object({

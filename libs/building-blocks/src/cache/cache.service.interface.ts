@@ -1,8 +1,7 @@
-import type { GlideClient } from '@valkey/valkey-glide'
-
-import type ms from 'ms'
-
 import { Token } from '@internal/common'
+
+import type { GlideClient } from '@valkey/valkey-glide'
+import type ms from 'ms'
 
 export type CacheKey<TType = unknown> = string & { __type: TType }
 

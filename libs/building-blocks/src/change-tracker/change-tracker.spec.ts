@@ -1,11 +1,11 @@
+import { Entity } from '@internal/common'
+
 import { randomUUID } from 'node:crypto'
 
 import type { TestingModule } from '@nestjs/testing'
 import { Test } from '@nestjs/testing'
 import { ClsModule, ClsService } from 'nestjs-cls'
 import z from 'zod'
-
-import { Entity } from '@internal/common'
 
 import { ChangeTracker } from './change-tracker'
 

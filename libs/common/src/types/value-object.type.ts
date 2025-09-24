@@ -2,7 +2,8 @@ import { randomUUID, UUID } from 'node:crypto'
 
 import { z } from 'zod'
 
-import { deepFreeze, DeepReadonly, diff, getTypedMetadata, MetadataKey, SetTypedMetadata } from '#/utils'
+import { DeepReadonly, deepFreeze, diff, getTypedMetadata, MetadataKey, SetTypedMetadata } from '#/utils'
+
 const Schema = Symbol('Schema')
 const MetadataKeys = {
   TypeId: MetadataKey<UUID>('TypeId'),

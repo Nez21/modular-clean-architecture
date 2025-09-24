@@ -30,4 +30,4 @@ export class Lazy<T> {
   }
 }
 
-export const isLazy = (value: unknown): value is Lazy<unknown> => typeof value == 'object' && value instanceof Lazy
+export const isLazy = (value: unknown): value is Lazy<unknown> => typeof value === 'object' && value instanceof Lazy

@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/correctness/noUnusedVariables: False positive */
+/** biome-ignore-all lint/suspicious/noTsIgnore: Type hack */
 type AnyObject = Record<string | symbol, any>
 
 type Class<TInstance extends object = object, TArgs extends any[] = any[]> = new (...args: TArgs) => TInstance
@@ -12,8 +14,11 @@ type Instance<T> = T & { constructor: Class<T> }
 
 type IsUnion<T, U extends T = T> = T extends unknown ? ([U] extends [T] ? false : true) : false
 
-type IfEquals<T, U, Y = unknown, N = never> =
-  (<G>() => G extends T ? true : false) extends <G>() => G extends U ? true : false ? Y : N
+type IfEquals<T, U, Y = unknown, N = never> = (<G>() => G extends T ? true : false) extends <G>() => G extends U
+  ? true
+  : false
+  ? Y
+  : N
 
 type Coalesce<T, U> = IfEquals<T, never, U, T>
 

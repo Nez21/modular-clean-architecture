@@ -1,16 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { Dto } from '@internal/common'
+
 import type { TestingModule } from '@nestjs/testing'
 import { Test } from '@nestjs/testing'
 import z from 'zod'
 
-import { Dto } from '@internal/common'
-
+import { ValidationBehavior } from './validation.behavior'
 import { BaseCommand, CommandHandler } from '../command.interface'
 import type { Mediator } from '../mediator'
 import { IMediator } from '../mediator.interface'
 import { MediatorModule } from '../mediator.module'
-
-import { ValidationBehavior } from './validation.behavior'
 
 class TestCommandDto extends Dto(
   z.object({

@@ -1,11 +1,11 @@
-import { Module, RequestMethod } from '@nestjs/common'
-import { LoggerModule } from 'nestjs-pino'
-
 import { CacheModule } from '@internal/building-blocks/cache'
 import { HealthModule } from '@internal/building-blocks/health'
 import { MediatorModule } from '@internal/building-blocks/mediator'
 import { RestateModule } from '@internal/building-blocks/restate'
 import { UserModule } from '@internal/user-module'
+
+import { Module, RequestMethod } from '@nestjs/common'
+import { LoggerModule } from 'nestjs-pino'
 
 import { cfg } from './config'
 
@@ -16,7 +16,7 @@ import { cfg } from './config'
       pinoHttp: {
         level: cfg.appLogLevel,
         transport:
-          cfg.nodeEnv == 'development'
+          cfg.nodeEnv === 'development'
             ? {
                 target: 'pino-pretty',
                 options: {

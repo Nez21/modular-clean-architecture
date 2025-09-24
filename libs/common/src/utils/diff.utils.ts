@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-base-to-string */
-/* eslint-disable sonarjs/cognitive-complexity */
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
-/* eslint-disable @typescript-eslint/no-for-in-array */
 export interface DiffCreate {
   type: 'add'
   path: (string | number)[]
@@ -90,6 +86,7 @@ export const diff = (
       !(
         areCompatibleObjects &&
         // @ts-ignore
+        // biome-ignore lint/style/useTemplate: Type hack
         (Number.isNaN(objValue) ? objValue + '' === newObjValue + '' : +objValue === +newObjValue)
       )
     ) {

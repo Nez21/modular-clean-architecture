@@ -1,3 +1,5 @@
+import { Token } from '@internal/common'
+
 import type {
   Context,
   ObjectContext,
@@ -6,8 +8,6 @@ import type {
   WorkflowSharedContext
 } from '@restatedev/restate-sdk'
 import type { Ingress } from '@restatedev/restate-sdk-clients'
-
-import { Token } from '@internal/common'
 
 export type IRestateClient = Ingress
 export const IRestateClient = Token<IRestateClient>('IRestateClient')
