@@ -10,7 +10,10 @@
   "exclude": ["out-tsc", "dist", "src/**/*.spec.ts", "src/**/*.test.ts", "webpack.config.js"],
   "references": [
     {
-      "path": "../../libs/modules/identity/tsconfig.lib.json"
+      "path": "../../libs/common/tsconfig.lib.json"
+    },
+    {
+      "path": "../../modules/core/identity/tsconfig.lib.json"
     },
     {
       "path": "../../libs/building-blocks/tsconfig.lib.json"

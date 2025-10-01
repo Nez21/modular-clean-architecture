@@ -10,13 +10,13 @@ const configSchema = z
       nodeEnv: z.enum(['development', 'production']).default('development'),
       appLogLevel: z.enum(['debug', 'info', 'warn', 'error']).default('debug'),
 
-      valkeyUrl: z.string().url(),
+      valkeyUrl: z.url(),
 
-      restateUrl: z.string().url(),
+      restateUrl: z.url(),
       restateAppPort: z.coerce.number().default(4000),
 
-      userPostgresUrl: z.string().url()
+      identityPostgresUrl: z.url()
     })
   )
 
-export const cfg = configSchema.parse(process.env)
+export const cfg = configSchema.parse(structuredClone(process.env))

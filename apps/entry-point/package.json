@@ -33,6 +33,8 @@
     }
   },
   "dependencies": {
+    "@infisical/sdk": "4.0.5",
+    "ms": "2.1.3",
     "nestjs-pino": "4.4.1",
     "pino-http": "10.5.0"
   },

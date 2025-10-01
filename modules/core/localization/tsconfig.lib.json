@@ -11,10 +11,10 @@
   "include": ["src/**/*.ts"],
   "references": [
     {
-      "path": "../../building-blocks/tsconfig.lib.json"
+      "path": "../../../libs/building-blocks/tsconfig.lib.json"
     },
     {
-      "path": "../../common/tsconfig.lib.json"
+      "path": "../../../libs/common/tsconfig.lib.json"
     }
   ],
   "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts", "vitest.config.mts"]

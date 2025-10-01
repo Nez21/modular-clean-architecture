@@ -1,5 +1,3 @@
-import { Token } from '@internal/common'
-
 import { DiscoveryModule, DiscoveryService } from '@golevelup/nestjs-discovery'
 import { type DynamicModule, Inject, Logger, type OnApplicationBootstrap } from '@nestjs/common'
 import { ModuleRef } from '@nestjs/core'
@@ -26,16 +24,7 @@ import {
   ServiceMetadata,
   WorkflowMetadata
 } from './restate.interface'
-
-export interface RestateModuleOptions {
-  client: {
-    url: string
-    headers?: Record<string, string>
-  }
-  appPort: number
-}
-
-const RestateModuleOptions = Token<RestateModuleOptions>('RestateModuleOptions')
+import { RestateModuleOptions } from './restate.module.types'
 
 export class RestateModule implements OnApplicationBootstrap {
   private static logger = new Logger(RestateModule.name)

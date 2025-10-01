@@ -1,7 +1,7 @@
 import { deserialize, serialize } from '@internal/common'
 
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import { Batch, GlideString, TimeUnit, Transaction } from '@valkey/valkey-glide'
+import { Batch, GlideString, TimeUnit } from '@valkey/valkey-glide'
 import ms from 'ms'
 
 import { DefaultCacheTTL } from './cache.const'

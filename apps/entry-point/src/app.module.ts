@@ -42,7 +42,7 @@ import { cfg } from './config'
     // Feature Modules
     IdentityModule.register({
       postgres: {
-        connectionString: cfg.userPostgresUrl
+        connectionString: cfg.identityPostgresUrl
       },
       nodeEnv: cfg.nodeEnv
     })

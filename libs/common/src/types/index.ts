@@ -1,3 +1,4 @@
 export * from './dto.type'
 export * from './entity.type'
+export * from './id.type'
 export * from './value-object.type'

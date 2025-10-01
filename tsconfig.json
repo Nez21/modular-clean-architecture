@@ -10,10 +10,10 @@
       "path": "./libs/building-blocks"
     },
     {
-      "path": "./libs/modules/identity"
+      "path": "./modules/core/identity"
     },
     {
-      "path": "./libs/modules/localization"
+      "path": "./modules/core/localization"
     },
     {
       "path": "./apps/entry-point"

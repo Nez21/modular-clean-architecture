@@ -1,7 +1,7 @@
 import '@nestjs/common'
 
 declare module '@nestjs/common' {
-  export type InjectionToken<TType> = Function & { __type: TType }
+  export type InjectionToken<TType> = (string | symbol | Function) & { __type: TType }
 
   export const Inject: <TType>(
     token: IfEquals<

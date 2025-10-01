@@ -73,3 +73,5 @@ type CustomInstanceType<T> = T extends Class<infer R>[] ? R[] : T extends Class<
 type Action<T> = (() => Promise<T>) | (() => T)
 
 type NodeEnv = 'development' | 'production'
+
+type DeepPartial<T> = T extends object ? { [P in keyof T]?: DeepPartial<T[P]> } : T

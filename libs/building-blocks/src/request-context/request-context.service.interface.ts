@@ -2,6 +2,7 @@ import { Token } from '@internal/common'
 
 export interface IRequestContext {
   get tenantId(): string
+  get idempotencyKey(): string
 }
 
 export interface IRequestContextService {

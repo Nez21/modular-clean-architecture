@@ -1,6 +1,8 @@
+import { encodeId } from '@internal/common'
+
 import { Injectable } from '@nestjs/common'
 
-import { IUserRepository, User } from '#/domain'
+import { IUserRepository, User, UserId } from '#/domain'
 
 import { users } from '../postgres-data.schema'
 
@@ -8,7 +10,7 @@ import { users } from '../postgres-data.schema'
 export class UserRepository implements IUserRepository {
   static toEntity(user: typeof users.$inferSelect): User {
     return User.create({
-      id: user.id,
+      id: encodeId(UserId, user.id),
       name: user.name,
       email: user.email,
       gender: user.gender,

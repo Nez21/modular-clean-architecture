@@ -1,98 +1,121 @@
-// import { applyDecorators } from '@nestjs/common'
-// import { Inject } from '@nestjs/common/decorators'
-// import { Duration } from 'luxon'
-// import hash, { type NotUndefined } from 'object-hash'
+import { applyDecorators } from '@nestjs/common'
+import { Inject } from '@nestjs/common/decorators'
+import ms from 'ms'
+import hash, { type NotUndefined } from 'object-hash'
+import { defer, delayWhen, mergeMap, of, throwError } from 'rxjs'
+import { kebabCase } from 'string-ts'
 
-// import { Mutex } from 'redis-semaphore'
-// import { defer, delayWhen, mergeMap, of, throwError } from 'rxjs'
+import { CacheKey, ICacheService } from '#/cache'
+import { IDistributedLockService } from '#/distributed-lock/distributed-lock.interface'
+import { IRequestContextService } from '#/request-context'
 
-// import { kebabCase } from 'string-ts'
+import { wrapPipeline } from './resilience.utils'
 
-// import { CacheKey, ICacheService, ValkeyClient } from '#/cache'
-// import { IRequestContextService } from '#/request-context'
+export type IdempotentOptions =
+  | {
+      key: 'idempotentKey'
+      cacheTTL: ms.StringValue
+      executionTimeout: ms.StringValue
+      retry: {
+        count: number
+        delay: ms.StringValue
+        jitter: ms.StringValue
+      }
+    }
+  | {
+      key: 'requestHash'
+      keyIndex: number
+      cacheTTL: ms.StringValue
+      executionTimeout: ms.StringValue
+      retry: {
+        count: number
+        delay: ms.StringValue
+        jitter: ms.StringValue
+      }
+    }
 
-// import { wrapPipeline } from './resilience.utils'
+const defaultOptions: IdempotentOptions = {
+  key: 'requestHash',
+  keyIndex: 0,
+  cacheTTL: '1 minute',
+  executionTimeout: '5 seconds',
+  retry: {
+    count: 10,
+    delay: '200ms',
+    jitter: '100ms'
+  }
+}
 
-// export type IdempotentOptions =
-//   | {
-//       key: 'idempotentKey'
-//       cacheTTL: Duration
-//       executionTimeout: Duration
-//     }
-//   | {
-//       key: 'requestHash'
-//       keyIndex: number
-//       cacheTTL: Duration
-//       executionTimeout: Duration
-//     }
+type TypedDecorator = TypedMethodDecorator<'inherit', 'target', (...args: NonEmptyArray<any>) => Promise<any>>
 
-// const defaultOptions: IdempotentOptions = {
-//   key: 'requestHash',
-//   keyIndex: 0,
-//   cacheTTL: Duration.fromObject({ minutes: 1 }),
-//   executionTimeout: Duration.fromObject({ seconds: 5 })
-// }
+export const UseIdempotent = (options?: Partial<IdempotentOptions>): TypedDecorator => {
+  const idempotentOptions: IdempotentOptions = {
+    ...defaultOptions,
+    ...options,
+    retry: {
+      ...defaultOptions.retry,
+      ...options?.retry
+    }
+  }
 
-// type TypedDecorator = TypedMethodDecorator<'inherit', 'target', (...args: NonEmptyArray<any>) => Promise<any>>
+  return applyDecorators(
+    (target: object) => {
+      Inject(ICacheService)(target, 'cacheService')
+      Inject(IDistributedLockService)(target, 'distributedLockService')
+      idempotentOptions.key === 'idempotentKey' && Inject(IRequestContextService)(target, 'requestContextService')
+    },
+    wrapPipeline(async (args, next, ctx) => {
+      const { cacheService, distributedLockService, requestContextService } = ctx.instance as {
+        cacheService: ICacheService
+        distributedLockService: IDistributedLockService
+        requestContextService: IRequestContextService
+      }
 
-// export const UseIdempotent = (options?: Partial<IdempotentOptions>): TypedDecorator => {
-//   const idempotentOptions = { ...defaultOptions, ...options }
+      const requestId =
+        idempotentOptions.key === 'idempotentKey'
+          ? `${kebabCase(ctx.class.name)}:${requestContextService.current.idempotencyKey}`
+          : `${kebabCase(ctx.class.name)}:${hash((args[idempotentOptions.keyIndex] ?? '') as NotUndefined)}`
+      const cachedResultKey = CacheKey<unknown>(`${requestId}:result`)
 
-//   return applyDecorators(
-//     (target: object) => {
-//       Inject(ICacheService)(target, 'cacheService')
-//       Inject(ValkeyClient)(target, 'valkeyClient')
-//       idempotentOptions.key === 'idempotentKey' && Inject(IRequestContextService)(target, 'requestContextService')
-//     },
-//     wrapPipeline(async (args, next, ctx) => {
-//       const { cacheService, valkeyClient, requestContextService } = ctx.instance as {
-//         cacheService: ICacheService
-//         valkeyClient: ValkeyClient
-//         requestContextService: IRequestContextService
-//       }
+      let cachedResult = await cacheService.keyValueGet(cachedResultKey)
 
-//       const requestId =
-//         idempotentOptions.key === 'idempotentKey'
-//           ? `${kebabCase(ctx.class.name)}:${requestContextService.idempotentKey}`
-//           : `${kebabCase(ctx.class.name)}:${hash((args[idempotentOptions.keyIndex] ?? '') as NotUndefined)}`
-//       const cachedResultKey = CacheKey<unknown>(`${requestId}:result`)
+      if (cachedResult) {
+        return of(cachedResult)
+      }
 
-//       let cachedResult = await cacheService.keyValueGet(cachedResultKey)
+      try {
+        const isAcquired = await distributedLockService.tryAcquire([requestId], {
+          ttl: idempotentOptions.executionTimeout,
+          retry: idempotentOptions.retry
+        })
 
-//       if (cachedResult) {
-//         return of(cachedResult)
-//       }
+        if (!isAcquired) {
+          return throwError(() => new Error('Failed to acquire lock'))
+        }
 
-//       const mutex = new Mutex(redisClient, `${requestId}:lock`, {
-//         acquireTimeout: idempotentOptions.executionTimeout.as('milliseconds'),
-//         lockTimeout: idempotentOptions.executionTimeout.as('milliseconds')
-//       })
+        cachedResult = await cacheService.keyValueGet(cachedResultKey)
 
-//       try {
-//         await mutex.acquire()
-//         cachedResult = await cacheService.keyValueGet(cachedResultKey)
+        if (cachedResult) {
+          await distributedLockService.release([requestId])
+          return of(cachedResult)
+        }
 
-//         if (cachedResult) {
-//           await mutex.release()
-//           return of(cachedResult)
-//         }
-
-//         return next.handle().pipe(
-//           mergeMap((result) =>
-//             of(result).pipe(
-//               delayWhen(() =>
-//                 defer(async () => {
-//                   await cacheService.keyValueSet(cachedResultKey, result, idempotentOptions.cacheTTL)
-//                   await mutex.release()
-//                 })
-//               )
-//             )
-//           )
-//         )
-//       } catch (error) {
-//         await mutex.release()
-//         return throwError(() => error)
-//       }
-//     })
-//   ) as TypedDecorator
-// }
+        return next.handle().pipe(
+          mergeMap((result) =>
+            of(result).pipe(
+              delayWhen(() =>
+                defer(async () => {
+                  await cacheService.keyValueSet(cachedResultKey, result, idempotentOptions.cacheTTL)
+                  await distributedLockService.release([requestId])
+                })
+              )
+            )
+          )
+        )
+      } catch (error) {
+        await distributedLockService.release([requestId])
+        return throwError(() => error)
+      }
+    })
+  ) as TypedDecorator
+}

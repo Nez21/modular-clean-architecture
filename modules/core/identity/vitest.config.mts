@@ -6,7 +6,7 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig(() => ({
   root: __dirname,
-  cacheDir: '../../../node_modules/.vite/libs/modules/identity',
+  cacheDir: '../../../node_modules/.vite/modules/core/identity',
   plugins: [
     swc.vite({
       module: { type: 'es6' }

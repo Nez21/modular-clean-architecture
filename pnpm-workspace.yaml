@@ -1,6 +1,6 @@
 packages:
-  - 'apps/*'
+  - 'apps/entry-point'
   - 'libs/building-blocks'
   - 'libs/common'
-  - 'libs/modules/localization'
-  - 'libs/modules/identity'
+  - 'modules/core/identity'
+  - 'modules/core/localization'

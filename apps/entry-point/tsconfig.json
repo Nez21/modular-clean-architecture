@@ -4,7 +4,10 @@
   "include": [],
   "references": [
     {
-      "path": "../../libs/modules/identity"
+      "path": "../../libs/common"
+    },
+    {
+      "path": "../../modules/core/identity"
     },
     {
       "path": "../../libs/building-blocks"

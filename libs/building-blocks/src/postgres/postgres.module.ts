@@ -1,6 +1,6 @@
-import type { TokenFn, TypedProvider } from '@internal/common'
+import type { TokenFn } from '@internal/common'
 
-import type { DynamicModule, InjectionToken } from '@nestjs/common'
+import type { DynamicModule } from '@nestjs/common'
 import { Logger } from '@nestjs/common'
 import type { DrizzleConfig } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
@@ -22,9 +22,6 @@ export interface PostgresConnectionOption {
 }
 
 export interface PostgresModuleOptions extends PostgresModuleBaseOptions, PostgresConnectionOption {}
-
-export type PostgresAsyncModuleOptions<TInjects extends (InjectionToken<any> | Class)[]> = PostgresModuleBaseOptions &
-  TypedProvider<PostgresConnectionOption, TInjects>
 
 export class PostgresModule {
   static readonly logger = new Logger(PostgresModule.name)

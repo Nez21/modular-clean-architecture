@@ -1,4 +1,5 @@
 import z from 'zod'
+import { core } from 'zod/v4'
 
 export const traversalSchema = (
   schema: z.ZodObject,
@@ -55,4 +56,20 @@ export const traversalSchema = (
   }
 
   recurse(schema, { nullable: false, array: false, arrayNullable: false })
+}
+
+declare module 'zod' {
+  interface ZodType<
+    out Output = unknown,
+    out Input = unknown,
+    out Internals extends core.$ZodTypeInternals<Output, Input> = core.$ZodTypeInternals<Output, Input>
+  > extends core.$ZodType<Output, Input, Internals> {
+    looseOptional(): z.ZodOptional<this>
+  }
+}
+
+export const extendZodType = (zod: typeof z) => {
+  zod.ZodType.prototype.looseOptional ??= function (this: z.ZodType) {
+    return this.nullish().transform((v) => v ?? undefined)
+  }
 }
