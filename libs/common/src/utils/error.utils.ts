@@ -13,3 +13,7 @@ export const catchError = <T>(fn: () => T): T extends Promise<infer U> ? Promise
     return { success: false, error } as any
   }
 }
+
+export const throwError = (error: unknown) => {
+  throw error
+}

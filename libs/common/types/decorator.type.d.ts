@@ -1,5 +1,6 @@
+/** biome-ignore-all lint/correctness/noUnusedVariables: False positive */
 type ErrorDisplayType = 'target' | 'decorator'
-type MatchType = 'exact' | 'inherit'
+type MatchType = 'exact' | 'extend'
 
 type TypeAssertion = {
   matchType: MatchType
@@ -10,12 +11,16 @@ type TypeAssertion = {
   returnType: unknown
 }
 
-type IfMatchType<TTarget, TBase, T extends MatchType, Y, N> = T extends 'extract'
+type IfMatchType<TTarget, TBase, TMatchType extends MatchType, Y, N> = TMatchType extends 'exact'
   ? IfEquals<TTarget, TBase, Y, N>
-  : T extends 'inherit'
-    ? TTarget extends TBase
-      ? Y
-      : N
+  : TMatchType extends 'extend'
+    ? TBase extends Function
+      ? TBase extends TTarget
+        ? Y
+        : N
+      : TTarget extends TBase
+        ? Y
+        : N
     : never
 
 type AssertType<T extends TypeAssertion> = IfMatchType<
@@ -102,8 +107,8 @@ type TypedMethodDecorator<
       target: TKey extends string
         ? `parameters of method ${TKey} in the class`
         : 'parameters of method [Symbol()] in the class'
-      targetType: Parameters<GetPropertyType<TTarget, TKey>>
-      decoratorType: Parameters<TDecoratorType>
+      targetType: (...args: Parameters<GetPropertyType<TTarget, TKey>>) => void
+      decoratorType: (...args: Parameters<TDecoratorType>) => void
       returnType: TypedPropertyDescriptor<GetPropertyType<TTarget, TKey>> | void
     }>
   | AssertType<{

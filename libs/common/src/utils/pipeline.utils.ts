@@ -10,15 +10,15 @@ export interface PipelineContext {
   handler: Function
 }
 
-export interface PipelineFunction {
-  (args: unknown[], next: CallHandler, ctx: PipelineContext): Observable<unknown> | Promise<Observable<unknown>>
+export interface PipelineFunction<TInput extends any[] = any[]> {
+  (args: TInput, next: CallHandler, ctx: PipelineContext): Observable<unknown> | Promise<Observable<unknown>>
 }
 
 export const pipelineMetadataKey = Symbol('pipeline')
 
-export const wrapPipeline = (fn: PipelineFunction): MethodDecorator => {
+export const wrapPipeline = <TInput extends any[]>(fn: PipelineFunction<TInput>): MethodDecorator => {
   return (target, propertyKey, descriptor) => {
-    let pipeline = (Reflect.getMetadata(pipelineMetadataKey, target, propertyKey) ?? []) as PipelineFunction[]
+    let pipeline = (Reflect.getMetadata(pipelineMetadataKey, target, propertyKey) ?? []) as PipelineFunction<TInput>[]
     Reflect.defineMetadata(pipelineMetadataKey, [...pipeline, fn], target, propertyKey)
 
     if (pipeline.length > 0) return
@@ -33,7 +33,7 @@ export const wrapPipeline = (fn: PipelineFunction): MethodDecorator => {
       throw new TypeError('Method is not a function')
     }
 
-    descriptor.value = function (this: any, ...args: any[]) {
+    descriptor.value = function (this: any, ...args: TInput) {
       const ctx: PipelineContext = {
         class: target.constructor,
         instance: this,
@@ -43,7 +43,7 @@ export const wrapPipeline = (fn: PipelineFunction): MethodDecorator => {
         handle: () => defer(() => Promise.resolve(originalMethod.apply(this, args)))
       }
 
-      pipeline = Reflect.getMetadata(pipelineMetadataKey, target, propertyKey) as PipelineFunction[]
+      pipeline = Reflect.getMetadata(pipelineMetadataKey, target, propertyKey) as PipelineFunction<TInput>[]
 
       for (const pipelineFn of pipeline) {
         const nextHandler = chain.handle

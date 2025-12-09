@@ -12,13 +12,13 @@ export const RestateObject = (name: string, options?: Omit<ServiceMetadata, 'nam
 export const RestateWorkflow = (
   name: string,
   options?: Omit<ServiceMetadata, 'name'>
-): TypedClassDecorator<'inherit', 'target', IRestateWorkflow> =>
+): TypedClassDecorator<'extend', 'target', IRestateWorkflow> =>
   SetTypedMetadata(MetadataKeys.Workflow, { name, ...options })
-export const Handler: TypedMethodDecorator<'inherit', 'target', IRestateHandler> = SetMetadata(
+export const Handler: TypedMethodDecorator<'extend', 'target', IRestateHandler> = SetMetadata(
   MetadataKeys.Handler,
   true
 )
-export const SharedHandler: TypedMethodDecorator<'inherit', 'target', IRestateSharedHandler> = SetMetadata(
+export const SharedHandler: TypedMethodDecorator<'extend', 'target', IRestateSharedHandler> = SetMetadata(
   MetadataKeys.SharedHandler,
   true
 )

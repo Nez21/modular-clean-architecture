@@ -1,7 +1,7 @@
+import { wrapPipeline } from '@internal/common'
+
 import ms from 'ms'
 import { retry, timer } from 'rxjs'
-
-import { wrapPipeline } from './resilience.utils'
 
 export interface RetryOptions {
   count: number
@@ -13,7 +13,7 @@ const defaultOptions: RetryOptions = {
   baseDelay: '1 second'
 }
 
-type TypedDecorator = TypedMethodDecorator<'inherit', 'target', (...args: any[]) => Promise<any>>
+type TypedDecorator = TypedMethodDecorator<'extend', 'target', (...args: any[]) => Promise<any>>
 
 export const UseRetry = (options?: Partial<RetryOptions>): TypedDecorator => {
   const retryOptions = { ...defaultOptions, ...options }

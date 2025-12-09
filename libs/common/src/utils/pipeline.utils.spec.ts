@@ -1,6 +1,6 @@
 import { type Observable, of, throwError } from 'rxjs'
 
-import { PipelineFunction, pipelineMetadataKey, wrapPipeline } from './resilience.utils'
+import { PipelineFunction, pipelineMetadataKey, wrapPipeline } from './pipeline.utils'
 
 describe('wrapPipeline', () => {
   it('should wrap a method and execute a single pipeline function before it', async () => {

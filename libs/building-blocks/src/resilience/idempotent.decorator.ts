@@ -1,3 +1,5 @@
+import { wrapPipeline } from '@internal/common'
+
 import { applyDecorators } from '@nestjs/common'
 import { Inject } from '@nestjs/common/decorators'
 import ms from 'ms'
@@ -9,35 +11,20 @@ import { CacheKey, ICacheService } from '#/cache'
 import { IDistributedLockService } from '#/distributed-lock/distributed-lock.interface'
 import { IRequestContextService } from '#/request-context'
 
-import { wrapPipeline } from './resilience.utils'
-
-export type IdempotentOptions =
-  | {
-      key: 'idempotentKey'
-      cacheTTL: ms.StringValue
-      executionTimeout: ms.StringValue
-      retry: {
-        count: number
-        delay: ms.StringValue
-        jitter: ms.StringValue
-      }
-    }
-  | {
-      key: 'requestHash'
-      keyIndex: number
-      cacheTTL: ms.StringValue
-      executionTimeout: ms.StringValue
-      retry: {
-        count: number
-        delay: ms.StringValue
-        jitter: ms.StringValue
-      }
-    }
+export type IdempotentOptions = {
+  keyIndex: number
+  cacheTtl: ms.StringValue
+  executionTimeout: ms.StringValue
+  retry: {
+    count: number
+    delay: ms.StringValue
+    jitter: ms.StringValue
+  }
+}
 
 const defaultOptions: IdempotentOptions = {
-  key: 'requestHash',
   keyIndex: 0,
-  cacheTTL: '1 minute',
+  cacheTtl: '1 minute',
   executionTimeout: '5 seconds',
   retry: {
     count: 10,
@@ -46,7 +33,7 @@ const defaultOptions: IdempotentOptions = {
   }
 }
 
-type TypedDecorator = TypedMethodDecorator<'inherit', 'target', (...args: NonEmptyArray<any>) => Promise<any>>
+type TypedDecorator = TypedMethodDecorator<'extend', 'target', (...args: NonEmptyArray<any>) => Promise<any>>
 
 export const UseIdempotent = (options?: Partial<IdempotentOptions>): TypedDecorator => {
   const idempotentOptions: IdempotentOptions = {
@@ -62,7 +49,7 @@ export const UseIdempotent = (options?: Partial<IdempotentOptions>): TypedDecora
     (target: object) => {
       Inject(ICacheService)(target, 'cacheService')
       Inject(IDistributedLockService)(target, 'distributedLockService')
-      idempotentOptions.key === 'idempotentKey' && Inject(IRequestContextService)(target, 'requestContextService')
+      Inject(IRequestContextService)(target, 'requestContextService')
     },
     wrapPipeline(async (args, next, ctx) => {
       const { cacheService, distributedLockService, requestContextService } = ctx.instance as {
@@ -71,19 +58,18 @@ export const UseIdempotent = (options?: Partial<IdempotentOptions>): TypedDecora
         requestContextService: IRequestContextService
       }
 
-      const requestId =
-        idempotentOptions.key === 'idempotentKey'
-          ? `${kebabCase(ctx.class.name)}:${requestContextService.current.idempotencyKey}`
-          : `${kebabCase(ctx.class.name)}:${hash((args[idempotentOptions.keyIndex] ?? '') as NotUndefined)}`
+      const key =
+        requestContextService.current.idempotencyKey ?? hash((args[idempotentOptions.keyIndex] ?? '') as NotUndefined)
+      const requestId = `${kebabCase(ctx.class.name)}:${key}`
       const cachedResultKey = CacheKey<unknown>(`${requestId}:result`)
 
-      let cachedResult = await cacheService.keyValueGet(cachedResultKey)
-
-      if (cachedResult) {
-        return of(cachedResult)
-      }
-
       try {
+        let cachedResult = await cacheService.keyValueGet(cachedResultKey)
+
+        if (cachedResult) {
+          return of(cachedResult)
+        }
+
         const isAcquired = await distributedLockService.tryAcquire([requestId], {
           ttl: idempotentOptions.executionTimeout,
           retry: idempotentOptions.retry
@@ -105,7 +91,7 @@ export const UseIdempotent = (options?: Partial<IdempotentOptions>): TypedDecora
             of(result).pipe(
               delayWhen(() =>
                 defer(async () => {
-                  await cacheService.keyValueSet(cachedResultKey, result, idempotentOptions.cacheTTL)
+                  await cacheService.keyValueSet(cachedResultKey, result, idempotentOptions.cacheTtl)
                   await distributedLockService.release([requestId])
                 })
               )

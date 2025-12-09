@@ -64,7 +64,10 @@ declare module 'zod' {
     out Input = unknown,
     out Internals extends core.$ZodTypeInternals<Output, Input> = core.$ZodTypeInternals<Output, Input>
   > extends core.$ZodType<Output, Input, Internals> {
-    looseOptional(): z.ZodOptional<this>
+    looseOptional(): z.ZodPipe<
+      z.ZodOptional<z.ZodNullable<this>>,
+      z.ZodTransform<Exclude<z.infer<this>, null> | undefined, z.infer<this>>
+    >
   }
 }
 

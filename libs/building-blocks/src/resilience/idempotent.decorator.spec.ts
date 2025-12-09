@@ -6,6 +6,7 @@ import { type StartedValkeyContainer, ValkeyContainer } from '@testcontainers/va
 import { UseIdempotent } from './idempotent.decorator'
 import { CacheModule } from '../cache'
 import { DistributedLockModule } from '../distributed-lock'
+import { IRequestContextService } from '../request-context'
 
 @Injectable()
 class TestClass {
@@ -33,7 +34,17 @@ describe('UseIdempotent', () => {
         CacheModule.forRoot({ connectionString: container.getConnectionUrl() }),
         DistributedLockModule.forRoot()
       ],
-      providers: [TestClass]
+      providers: [
+        TestClass,
+        IRequestContextService({
+          useValue: {
+            current: {
+              tenantId: 'test-tenant-id',
+              idempotencyKey: undefined
+            }
+          }
+        })
+      ]
     }).compile()
 
     testClass = module.get<TestClass>(TestClass)
@@ -75,7 +86,7 @@ describe('UseIdempotent', () => {
       @Injectable()
       class CustomTestClass {
         handle = vi.fn()
-        @UseIdempotent({ cacheTTL: '1 second' })
+        @UseIdempotent({ cacheTtl: '1 second' })
         async method(input: string) {
           return this.handle(input) as unknown
         }
@@ -86,7 +97,17 @@ describe('UseIdempotent', () => {
           CacheModule.forRoot({ connectionString: container.getConnectionUrl() }),
           DistributedLockModule.forRoot()
         ],
-        providers: [CustomTestClass]
+        providers: [
+          CustomTestClass,
+          IRequestContextService({
+            useValue: {
+              current: {
+                tenantId: 'test-tenant-id',
+                idempotencyKey: undefined
+              }
+            }
+          })
+        ]
       }).compile()
       const customTestClass = customModule.get<CustomTestClass>(CustomTestClass)
       customTestClass.handle.mockReturnValueOnce('first-result').mockReturnValueOnce('second-result')

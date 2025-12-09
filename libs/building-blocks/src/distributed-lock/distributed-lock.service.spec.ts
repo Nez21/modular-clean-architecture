@@ -259,12 +259,6 @@ describe('DistributedLockService', () => {
       expect(result).toBe(true)
     })
 
-    it('should handle releasing non-existent locks gracefully', async () => {
-      const keys = ['non-existent-key']
-
-      await expect(service.release(keys)).rejects.toThrow('Lock values do not match')
-    })
-
     it('should handle releasing empty array of keys', async () => {
       const keys: string[] = []
 
@@ -409,7 +403,7 @@ describe('DistributedLockService', () => {
       const keys = ['duplicate-key', 'duplicate-key', 'duplicate-key']
       const action = vitest.fn().mockResolvedValue('duplicate-result')
 
-      await expect(service.acquire(keys, action)).rejects.toThrow('Lock values do not match')
+      await expect(service.acquire(keys, action)).resolves.toBe('duplicate-result')
     })
 
     it('should handle special characters in keys', async () => {

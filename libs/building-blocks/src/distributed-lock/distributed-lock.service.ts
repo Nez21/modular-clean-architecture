@@ -11,6 +11,15 @@ import { ValkeyClient } from '#/cache'
 import { AcquireOptions, IDistributedLockService } from './distributed-lock.interface'
 import { DistributedLockModuleOptions } from './distributed-lock.module.types'
 
+const defaultAcquireOptions: AcquireOptions = {
+  ttl: '5 seconds',
+  retry: {
+    count: 10,
+    delay: '250ms',
+    jitter: '200ms'
+  }
+}
+
 @Injectable()
 export class DistributedLockService implements IDistributedLockService {
   private readonly logger = new Logger(DistributedLockService.name)
@@ -22,10 +31,12 @@ export class DistributedLockService implements IDistributedLockService {
   ) {}
 
   async acquire<T>(keys: string[], action: Action<T>, options?: DeepPartial<AcquireOptions>): Promise<T> {
-    const mergedOptions = this.mergeOptions(options)
-    const lockKeys = keys.map((key) => this.getLockKey(key))
+    if (keys.length === 0) {
+      return action()
+    }
 
-    this.logger.debug(`Attempting to acquire locks for keys: ${keys.join(', ')}`)
+    const mergedOptions = this.mergeOptions(options)
+    const lockKeys = [...new Set(keys.map((key) => this.getLockKey(key)))]
 
     try {
       await this.tryAcquireLocks(lockKeys, mergedOptions)
@@ -36,8 +47,12 @@ export class DistributedLockService implements IDistributedLockService {
   }
 
   async tryAcquire(keys: string[], options?: DeepPartial<AcquireOptions>): Promise<boolean> {
+    if (keys.length === 0) {
+      return false
+    }
+
     const mergedOptions = this.mergeOptions(options)
-    const lockKeys = keys.map((key) => this.getLockKey(key))
+    const lockKeys = [...new Set(keys.map((key) => this.getLockKey(key)))]
 
     try {
       await this.tryAcquireLocks(lockKeys, mergedOptions)
@@ -49,18 +64,18 @@ export class DistributedLockService implements IDistributedLockService {
   }
 
   async release(keys: string[]): Promise<void> {
-    const lockKeys = keys.map((key) => this.getLockKey(key))
+    const lockKeys = [...new Set(keys.map((key) => this.getLockKey(key)))]
 
     await this.releaseLocks(lockKeys)
   }
 
   private mergeOptions(options?: DeepPartial<AcquireOptions>): AcquireOptions {
     return {
-      ttl: options?.ttl ?? this.moduleOptions.ttl,
+      ttl: options?.ttl ?? this.moduleOptions.ttl ?? defaultAcquireOptions.ttl,
       retry: {
-        count: options?.retry?.count ?? this.moduleOptions.retry.count,
-        delay: options?.retry?.delay ?? this.moduleOptions.retry.delay,
-        jitter: options?.retry?.jitter ?? this.moduleOptions.retry.jitter
+        count: options?.retry?.count ?? this.moduleOptions.retry?.count ?? defaultAcquireOptions.retry.count,
+        delay: options?.retry?.delay ?? this.moduleOptions.retry?.delay ?? defaultAcquireOptions.retry.delay,
+        jitter: options?.retry?.jitter ?? this.moduleOptions.retry?.jitter ?? defaultAcquireOptions.retry.jitter
       }
     }
   }
@@ -70,7 +85,7 @@ export class DistributedLockService implements IDistributedLockService {
   }
 
   private calculateRetryDelay(delay: ms.StringValue, jitter: ms.StringValue): number {
-    return ms(delay) * 2 + Math.random() * ms(jitter)
+    return ms(delay) + (Math.random() - 0.5) * ms(jitter)
   }
 
   private async tryAcquireLocks(lockKeys: string[], options: AcquireOptions): Promise<void> {
@@ -118,7 +133,8 @@ export class DistributedLockService implements IDistributedLockService {
   private async releaseLocks(acquiredKeys: string[]): Promise<void> {
     if (acquiredKeys.length === 0) return
 
-    const values = await this.valkey.mget(acquiredKeys)
+    let values = await this.valkey.mget(acquiredKeys)
+    values = values.filter(Boolean)
 
     if (values.length !== acquiredKeys.length) {
       this.logger.warn('Some locks were not acquired')
