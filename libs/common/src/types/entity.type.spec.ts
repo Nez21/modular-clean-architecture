@@ -34,7 +34,7 @@ describe('Entity Type', () => {
 
   describe('Entity Creation', () => {
     it('should create a valid entity', () => {
-      const entity = TestEntity.fromObject(validEntityData)
+      const entity = EntityUtils.create(TestEntity, validEntityData)
 
       expect(entity).toBeInstanceOf(TestEntity)
       expect(entity.id).toBe(validEntityData.id)
@@ -52,7 +52,7 @@ describe('Entity Type', () => {
         createdAt: new Date()
       }
 
-      const entity = TestEntity.fromObject(partialData)
+      const entity = EntityUtils.create(TestEntity, partialData)
 
       expect(entity.active).toBe(true)
       expect(Array.isArray(entity.tags)).toBe(true)
@@ -65,18 +65,18 @@ describe('Entity Type', () => {
         name: 'A'
       }
 
-      expect(() => TestEntity.fromObject(invalidData)).toThrow()
+      expect(() => EntityUtils.create(TestEntity, invalidData)).toThrow()
     })
   })
 
   describe('Entity Validation', () => {
     it('should validate a valid entity', () => {
-      const entity = TestEntity.fromObject(validEntityData)
+      const entity = EntityUtils.create(TestEntity, validEntityData)
       expect(entity.validate().isOk()).toBe(true)
     })
 
     it('should throw error when validating an invalid entity', () => {
-      const entity = TestEntity.fromObject(validEntityData)
+      const entity = EntityUtils.create(TestEntity, validEntityData)
 
       entity.setAge(-1)
 
@@ -86,8 +86,8 @@ describe('Entity Type', () => {
 
   describe('Entity Equality', () => {
     it('should consider entities with same key attributes equal', () => {
-      const entity1 = TestEntity.fromObject(validEntityData)
-      const entity2 = TestEntity.fromObject({
+      const entity1 = EntityUtils.create(TestEntity, validEntityData)
+      const entity2 = EntityUtils.create(TestEntity, {
         ...validEntityData,
         name: 'Different Name',
         age: 30
@@ -97,8 +97,8 @@ describe('Entity Type', () => {
     })
 
     it('should consider entities with different key attributes not equal', () => {
-      const entity1 = TestEntity.fromObject(validEntityData)
-      const entity2 = TestEntity.fromObject({
+      const entity1 = EntityUtils.create(TestEntity, validEntityData)
+      const entity2 = EntityUtils.create(TestEntity, {
         ...validEntityData,
         id: '123e4567-e89b-12d3-a456-426614174001'
       })
@@ -109,7 +109,7 @@ describe('Entity Type', () => {
 
   describe('Entity Serialization', () => {
     it('should serialize entity to JSON', () => {
-      const entity = TestEntity.fromObject(validEntityData)
+      const entity = EntityUtils.create(TestEntity, validEntityData)
       const json = entity.toJSON()
 
       expect(deserialize(json)).toEqual(validEntityData)
@@ -134,7 +134,7 @@ describe('Entity Type', () => {
     })
 
     it('should assert valid entity instance', () => {
-      const entity = TestEntity.fromObject(validEntityData)
+      const entity = EntityUtils.create(TestEntity, validEntityData)
       expect(() => {
         EntityUtils.assert(entity)
       }).not.toThrow()
@@ -189,7 +189,7 @@ describe('Entity Type', () => {
         }
       }
 
-      const entity = TestComplexEntity.fromObject(complexData)
+      const entity = EntityUtils.create(TestComplexEntity, complexData)
       expect(entity).toBeInstanceOf(TestComplexEntity)
       expect(entity.validate().isOk()).toBe(true)
     })
@@ -199,11 +199,11 @@ describe('Entity Type', () => {
     it('should fail when creating entity with missing required properties', () => {
       const incompleteData = { age: 25 }
       // @ts-expect-error
-      expect(() => TestEntity.fromObject(incompleteData)).toThrow()
+      expect(() => EntityUtils.create(TestEntity, incompleteData)).toThrow()
     })
 
     it('should fail when validating after corrupting the entity', () => {
-      const entity = TestEntity.fromObject(validEntityData)
+      const entity = EntityUtils.create(TestEntity, validEntityData)
 
       Object.defineProperty(entity, 'age', {
         value: 'not a number'
@@ -236,7 +236,7 @@ describe('Entity Type', () => {
       }
 
       // @ts-expect-error
-      expect(() => TestEntity.fromObject(invalidTypeData)).toThrow()
+      expect(() => EntityUtils.create(TestEntity, invalidTypeData)).toThrow()
     })
   })
 })

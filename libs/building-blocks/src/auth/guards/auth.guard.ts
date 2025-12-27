@@ -8,7 +8,7 @@ import { IJwtService } from '../jwt'
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  private readonly logger = new Logger(AuthGuard.name)
+  logger = new Logger(AuthGuard.name)
 
   constructor(
     @Inject(IJwtService) private readonly jwtService: IJwtService,

@@ -22,7 +22,7 @@ const defaultAcquireOptions: AcquireOptions = {
 
 @Injectable()
 export class DistributedLockService implements IDistributedLockService {
-  private readonly logger = new Logger(DistributedLockService.name)
+  logger = new Logger(DistributedLockService.name)
   private readonly lockValue = randomUUID()
 
   constructor(

@@ -1,4 +1,4 @@
-import { Entity } from '@internal/common'
+import { Entity, EntityUtils } from '@internal/common'
 
 import { randomUUID } from 'node:crypto'
 
@@ -52,7 +52,7 @@ describe('ChangeTracker', () => {
 
     changeTracker = moduleRef.get(ChangeTracker)
 
-    entity = TestEntity.fromObject({
+    entity = EntityUtils.create(TestEntity, {
       id: randomUUID(),
       name: 'Initial Name',
       status: 'active',

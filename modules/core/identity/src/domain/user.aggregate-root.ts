@@ -1,4 +1,4 @@
-import { createIdSchema, Entity, generateId } from '@internal/common'
+import { createIdSchema, Entity, EntityUtils, generateId } from '@internal/common'
 
 import { z } from 'zod'
 
@@ -23,7 +23,7 @@ export class User extends Entity(
   static create(input: { name: string; email: string; passwordHash: string; gender?: GenderEnum }): User {
     const now = new Date()
 
-    return User.fromObject({
+    return EntityUtils.create(User, {
       id: generateId(UserId),
       name: input.name,
       email: input.email,

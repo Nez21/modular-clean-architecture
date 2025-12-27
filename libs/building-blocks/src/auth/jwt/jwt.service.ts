@@ -12,7 +12,7 @@ export interface JwtServiceOptions {
 
 @Injectable()
 export class JwtService implements IJwtService {
-  private readonly logger = new Logger(JwtService.name)
+  logger = new Logger(JwtService.name)
 
   constructor(@Inject('JWT_OPTIONS') private readonly options: JwtServiceOptions) {}
 

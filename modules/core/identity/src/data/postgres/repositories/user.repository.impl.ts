@@ -1,6 +1,6 @@
 import { IChangeTracker } from '@internal/building-blocks/change-tracker'
 import { isPostgresError, PostgresErrorCode } from '@internal/building-blocks/postgres'
-import { createMapper, isEmptyObject } from '@internal/common'
+import { createMapper, EntityUtils, isEmptyObject } from '@internal/common'
 
 import { Injectable, Logger } from '@nestjs/common'
 import { Inject } from '@nestjs/common/decorators'
@@ -29,7 +29,7 @@ export class UserRepository implements IUserRepository {
   ) {}
 
   toEntity(user: typeof users.$inferSelect): User {
-    return User.fromObject(mapUserModelToEntity(user))
+    return EntityUtils.create(User, mapUserModelToEntity(user))
   }
 
   fromEntity(user: User): typeof users.$inferInsert {

@@ -18,7 +18,7 @@ export interface GraphQLTransportModuleOptions {
 }
 
 export class GraphQLTransportModule {
-  public static readonly logger = new Logger(GraphQLTransportModule.name)
+  static logger = new Logger(GraphQLTransportModule.name)
 
   static forEndpoint(options: GraphQLTransportModuleOptions): DynamicModule {
     const { endpoint, features, nodeEnv } = options

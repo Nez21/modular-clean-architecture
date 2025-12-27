@@ -1,7 +1,7 @@
 import { IChangeTracker } from '@internal/building-blocks/change-tracker'
 import { IMediator } from '@internal/building-blocks/mediator'
 import { isPostgresError, PostgresErrorCode } from '@internal/building-blocks/postgres'
-import { createMapper, isEmptyObject } from '@internal/common'
+import { createMapper, EntityUtils, isEmptyObject } from '@internal/common'
 
 import { Injectable, Logger } from '@nestjs/common'
 import { Inject } from '@nestjs/common/decorators'
@@ -30,7 +30,7 @@ export class TicketRepository implements ITicketRepository {
   ) {}
 
   toEntity(ticket: typeof tickets.$inferSelect): Ticket {
-    return Ticket.fromObject(mapTicketModelToEntity(ticket))
+    return EntityUtils.create(Ticket, mapTicketModelToEntity(ticket))
   }
 
   fromEntity(ticket: Ticket): typeof tickets.$inferInsert {
@@ -69,7 +69,7 @@ export class TicketRepository implements ITicketRepository {
         throw error
       })
         .andThen(() => ok(this.changeTracker.attach(ticket)))
-        .andThen(() => this.publishDomainEvents(ticket))
+        .andThen(() => ResultAsync.fromSafePromise(this.mediator.publishDomainEvents(ticket)))
     })
   }
 
@@ -78,7 +78,7 @@ export class TicketRepository implements ITicketRepository {
       const patch = this.changeTracker.toPatch(ticket)
 
       if (isEmptyObject(patch)) {
-        return this.publishDomainEvents(ticket)
+        return ResultAsync.fromSafePromise(this.mediator.publishDomainEvents(ticket))
       }
 
       const encodedId = TicketId.encode(ticket.id)
@@ -93,7 +93,7 @@ export class TicketRepository implements ITicketRepository {
       })
         .andThen((result) => (result.rowCount ? okAsync() : errAsync(TicketError.notFound())))
         .andThen(() => ok(this.changeTracker.refresh(ticket)))
-        .andThen(() => this.publishDomainEvents(ticket))
+        .andThen(() => ResultAsync.fromSafePromise(this.mediator.publishDomainEvents(ticket)))
     })
   }
 
@@ -114,31 +114,6 @@ export class TicketRepository implements ITicketRepository {
     })
       .andThen((result) => (result.rowCount ? okAsync() : errAsync(TicketError.notFound())))
       .andThen(() => ok(void this.changeTracker.detach(Ticket, { id })))
-  }
-
-  private publishDomainEvents(ticket: Ticket): ResultAsync<void, TicketError> {
-    const domainEvents = [...ticket.$domainEvents]
-
-    if (domainEvents.length === 0) return okAsync()
-
-    const publishPromises = domainEvents.map((event) => this.mediator.publish(event))
-
-    return ResultAsync.fromSafePromise(Promise.allSettled(publishPromises))
-      .andThen((results) => {
-        const errors = results.filter((result) => result.status === 'rejected').map((result) => result.reason)
-
-        if (errors.length > 0) {
-          this.logger.error({
-            message: '[PUBLISH] Failed to publish domain events',
-            errors
-          })
-
-          throw new AggregateError(errors, 'Failed to publish domain events')
-        }
-
-        return okAsync()
-      })
-      .andThen(() => ok(ticket.clearDomainEvents()))
   }
 
   private validate(ticket: Ticket): Result<void, TicketError> {

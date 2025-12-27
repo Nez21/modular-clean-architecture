@@ -62,7 +62,7 @@ describe('CacheService', () => {
     }).compile()
 
     service = module.get<ICacheService>(ICacheService)
-    vitest.spyOn(CacheService.logger, 'error').mockImplementation(() => {})
+    vitest.spyOn((service as CacheService).logger, 'error').mockImplementation(() => {})
   })
 
   afterEach(async () => {

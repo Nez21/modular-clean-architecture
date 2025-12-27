@@ -24,7 +24,7 @@ export interface PostgresConnectionOption {
 export interface PostgresModuleOptions extends PostgresModuleBaseOptions, PostgresConnectionOption {}
 
 export class PostgresModule {
-  static readonly logger = new Logger(PostgresModule.name)
+  logger = new Logger(PostgresModule.name)
 
   static createDrizzle(
     moduleOptions: PostgresModuleBaseOptions,

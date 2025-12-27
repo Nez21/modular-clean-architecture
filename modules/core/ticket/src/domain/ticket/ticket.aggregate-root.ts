@@ -1,4 +1,4 @@
-import { createIdSchema, Entity, generateId } from '@internal/common'
+import { createIdSchema, Entity, EntityUtils, generateId, WithDomainEventsMixin } from '@internal/common'
 
 import { z } from 'zod'
 
@@ -56,10 +56,9 @@ export class Ticket extends Entity(
     resolvedAt: z.date().looseOptional(),
     closedAt: z.date().looseOptional()
   }),
-  ['id']
+  ['id'],
+  [WithDomainEventsMixin<TicketDomainEvent>]
 ) {
-  private readonly domainEvents: TicketDomainEvent[] = []
-
   static create(input: {
     subject: string
     description: string
@@ -70,7 +69,7 @@ export class Ticket extends Entity(
   }): Ticket {
     const now = new Date()
 
-    const ticket = Ticket.fromObject({
+    const ticket = EntityUtils.create(Ticket, {
       id: generateId(TicketId),
       subject: input.subject,
       description: input.description,
@@ -173,18 +172,6 @@ export class Ticket extends Entity(
     )
 
     return this
-  }
-
-  addDomainEvent(event: TicketDomainEvent): void {
-    this.domainEvents.push(event)
-  }
-
-  get $domainEvents(): readonly TicketDomainEvent[] {
-    return this.domainEvents
-  }
-
-  clearDomainEvents(): void {
-    this.domainEvents.length = 0
   }
 }
 

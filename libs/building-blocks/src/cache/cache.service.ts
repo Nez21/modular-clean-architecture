@@ -10,7 +10,7 @@ import { CacheKey, ICacheService, ValkeyClient } from './cache.service.interface
 
 @Injectable()
 export class CacheService implements ICacheService {
-  public static readonly logger = new Logger(CacheService.name)
+  logger = new Logger(CacheService.name)
 
   private readonly prefix: string
   private readonly defaultTTL: ms.StringValue

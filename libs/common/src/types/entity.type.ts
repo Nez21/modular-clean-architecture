@@ -30,8 +30,9 @@ export type KeyOf<T extends IEntity> = {
 }
 export type EntityType<
   TSchema extends z.ZodObject = z.ZodObject<Record<string, z.ZodType<any>>>,
-  TKeyAttributes extends string[] = string[]
-> = IEntity<TSchema, TKeyAttributes> & DeepReadonly<z.output<TSchema>> & ProtectedData<z.output<TSchema>>
+  TKeyAttributes extends string[] = string[],
+  TMixins extends object = object
+> = IEntity<TSchema, TKeyAttributes> & DeepReadonly<z.output<TSchema>> & ProtectedData<z.output<TSchema>> & TMixins
 
 export class ProtectedData<T> {
   protected $value!: T
@@ -39,8 +40,9 @@ export class ProtectedData<T> {
 
 export function Entity<
   TSchema extends z.ZodObject,
-  TKeyAttributes extends NonEmptyArray<ObjectStringKeys<z.output<TSchema>, boolean | Date | number | string>>
->(schema: TSchema, keyAttributes: TKeyAttributes) {
+  TKeyAttributes extends NonEmptyArray<ObjectStringKeys<z.output<TSchema>, boolean | Date | number | string>>,
+  TMixins extends object
+>(schema: TSchema, keyAttributes: TKeyAttributes, mixins?: Class<TMixins>[]) {
   if (keyAttributes.length === 0) {
     throw new Error('Entity must have at least one key attribute')
   }
@@ -52,14 +54,6 @@ export function Entity<
   @SetTypedMetadata(MetadataKeys.Schema, schema)
   @SetTypedMetadata(MetadataKeys.KeyAttributes, keyAttributes)
   abstract class BaseEntity implements IEntity<TSchema> {
-    static fromObject<T extends IEntity & BaseEntity>(this: AnyClass<T>, obj: z.input<EntitySchemaOf<T>>): T {
-      // @ts-ignore
-      const instance = new this() as T
-      instance['$value'] = schema.parse(obj)
-
-      return instance
-    }
-
     static get $typeId(): UUID {
       return typeId
     }
@@ -99,7 +93,11 @@ export function Entity<
     })
   }
 
-  return BaseEntity as AbstractClass<EntityType<TSchema, TKeyAttributes>> & typeof BaseEntity
+  for (const mixin of mixins ?? []) {
+    Object.assign(BaseEntity.prototype, mixin.prototype)
+  }
+
+  return BaseEntity as AbstractClass<EntityType<TSchema, TKeyAttributes, TMixins>> & typeof BaseEntity
 }
 
 export abstract class EntityUtils {

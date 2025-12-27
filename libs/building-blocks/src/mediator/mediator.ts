@@ -1,4 +1,4 @@
-import { TokenFn } from '@internal/common'
+import { TokenFn, WithDomainEventsMixin } from '@internal/common'
 
 import { DiscoveryService } from '@golevelup/nestjs-discovery'
 import { CallHandler, Inject, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common'
@@ -15,7 +15,7 @@ import { BaseQuery, IQueryHandler, QueryResultOf } from './query.interface'
 
 @Injectable()
 export class Mediator implements IMediator, OnApplicationBootstrap {
-  public static readonly logger = new Logger(Mediator.name)
+  logger = new Logger(Mediator.name)
 
   private queryHandlers: Map<AnyClass<BaseQuery>, Class<IQueryHandler>> = new Map()
   private commandHandlers: Map<AnyClass<BaseCommand>, Class<ICommandHandler>> = new Map()
@@ -40,7 +40,7 @@ export class Mediator implements IMediator, OnApplicationBootstrap {
     for (const { meta: queryType, discoveredClass } of queryHandlersMetadata) {
       this.queryHandlers.set(queryType as AnyClass<BaseQuery>, discoveredClass.injectType as Class<IQueryHandler>)
 
-      Mediator.logger.log(`${queryType.name} {query} -> ${String(discoveredClass.injectType?.name)}`)
+      this.logger.log(`${queryType.name} {query} -> ${String(discoveredClass.injectType?.name)}`)
     }
 
     const commandHandlersMetadata = await this.discoveryService.providersWithMetaAtKey<Class>(MetadataKeys.Command)
@@ -51,7 +51,7 @@ export class Mediator implements IMediator, OnApplicationBootstrap {
         discoveredClass.injectType as Class<ICommandHandler>
       )
 
-      Mediator.logger.log(`${commandType.name} {command} -> ${String(discoveredClass.injectType?.name)}`)
+      this.logger.log(`${commandType.name} {command} -> ${String(discoveredClass.injectType?.name)}`)
     }
 
     const eventHandlersMetadata = await this.discoveryService.providersWithMetaAtKey<Class[]>(MetadataKeys.Events)
@@ -66,7 +66,7 @@ export class Mediator implements IMediator, OnApplicationBootstrap {
 
         const eventTypesNames = eventTypes.map((eventType) => eventType.name).join(', ')
 
-        Mediator.logger.log(`${eventTypesNames} {event} -> ${String(discoveredClass.injectType?.name)}`)
+        this.logger.log(`${eventTypesNames} {event} -> ${String(discoveredClass.injectType?.name)}`)
       }
     }
 
@@ -80,14 +80,14 @@ export class Mediator implements IMediator, OnApplicationBootstrap {
       if (Array.isArray(behaviorTypes) && behaviorTypes.length > 0) {
         this.handlerSpecificBehaviors.set(discoveredClass.injectType as Class, behaviorTypes)
 
-        Mediator.logger.log(`${behaviorTypes.join(', ')} {behavior} -> ${String(discoveredClass.injectType?.name)}`)
+        this.logger.log(`${behaviorTypes.join(', ')} {behavior} -> ${String(discoveredClass.injectType?.name)}`)
       }
     }
 
     for (const pipelineBehavior of this.defaultPipelineBehaviors) {
       this.moduleRef.introspect(pipelineBehavior as Class<BasePipelineBehavior>)
 
-      Mediator.logger.log(`${pipelineBehavior.name} {behavior}`)
+      this.logger.log(`${pipelineBehavior.name} {behavior}`)
     }
   }
 
@@ -147,13 +147,13 @@ export class Mediator implements IMediator, OnApplicationBootstrap {
     throw new Error(`No handler registered for request type: ${requestType.name}`)
   }
 
-  async publish<TEvent extends BaseEvent>(event: TEvent): Promise<void> {
+  async publish(event: BaseEvent): Promise<void> {
     const eventType = event.constructor as Class<BaseEvent>
     const handlerTypes = this.eventHandlers.get(eventType) || []
     const data = Object.assign(Reflect.construct(eventType, []), structuredClone(event))
 
     if (handlerTypes.length === 0) {
-      Mediator.logger.warn(`No handler registered for event type: ${eventType.name}`)
+      this.logger.warn(`No handler registered for event type: ${eventType.name}`)
     }
 
     const publishPromises = handlerTypes.map(async (handlerType) => {
@@ -186,6 +186,30 @@ export class Mediator implements IMediator, OnApplicationBootstrap {
     if (errors.length > 0) {
       throw new AggregateError(errors, 'Failed to publish event')
     }
+  }
+
+  async publishDomainEvents(entity: WithDomainEventsMixin<BaseEvent>): Promise<void> {
+    const domainEvents = entity.getDomainEvents()
+
+    if (domainEvents.length === 0) return
+
+    const publishPromises = domainEvents.map((event) => this.publish(event))
+
+    const results = await Promise.allSettled(publishPromises)
+    const errors = results
+      .filter((result) => result.status === 'rejected')
+      .map((result: PromiseRejectedResult) => result.reason as Error)
+
+    if (errors.length > 0) {
+      this.logger.error({
+        message: '[PUBLISH] Failed to publish domain events',
+        errors
+      })
+
+      throw new AggregateError(errors, 'Failed to publish domain events')
+    }
+
+    entity.clearDomainEvents()
   }
 
   private buildPipeline(input: PipelineBehaviorInput, finalHandler: () => Observable<unknown>): Observable<unknown> {

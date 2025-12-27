@@ -1,4 +1,4 @@
-import { Token } from '@internal/common'
+import { Token, WithDomainEventsMixin } from '@internal/common'
 
 import type { BaseCommand, CommandResultOf } from './command.interface'
 import type { BaseEvent } from './event.interface'
@@ -13,7 +13,8 @@ export interface IMediator {
     | CommandResultOf<TRequest extends BaseCommand ? TRequest : never>
     | QueryResultOf<TRequest extends BaseQuery ? TRequest : never>
   >
-  publish<TEvent extends BaseEvent>(event: TEvent): Promise<void>
+  publish(event: BaseEvent): Promise<void>
+  publishDomainEvents(entity: WithDomainEventsMixin<BaseEvent>): Promise<void>
 }
 
 export const IMediator = Token<IMediator>('IMediator')

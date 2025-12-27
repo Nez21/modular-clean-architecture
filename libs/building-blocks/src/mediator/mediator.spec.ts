@@ -145,8 +145,6 @@ class ErrorPipelineBehavior extends BasePipelineBehavior {
 }
 
 describe('Mediator', () => {
-  vi.spyOn(Mediator.logger, 'log').mockImplementation(() => undefined)
-
   describe('Standard cases', () => {
     let module: TestingModule
     let mediator: IMediator
@@ -172,6 +170,8 @@ describe('Mediator', () => {
       }).compile()
 
       mediator = module.get<IMediator>(IMediator)
+      vi.spyOn((mediator as Mediator).logger, 'log').mockImplementation(() => {})
+
       await (mediator as Mediator).onApplicationBootstrap()
 
       const validationBehavior = module.get<ValidationPipelineBehavior>(ValidationPipelineBehavior)
