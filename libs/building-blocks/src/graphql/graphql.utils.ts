@@ -111,15 +111,15 @@ const getNullableType = (array: boolean, nullable: boolean, arrayNullable: boole
   return arrayNullable
 }
 
-const registerType = (target: AnyClass<IDto>, type: 'input' | 'output') => {
+const registerType = (target: AnyClass<IDto>, type: 'input' | 'output', isAbstract: boolean = true) => {
   const schema = DtoUtils.getSchema(target)
   const name = getSchemaName(schema, type)
 
   if (cachedGqlTypes.has(name)) return
 
-  cachedGqlTypes.set(name, target)
   const classDecorator = type === 'input' ? InputType : ObjectType
-  classDecorator(name, { isAbstract: true, description: schema.description })(target)
+  classDecorator(name, { isAbstract, description: schema.description })(target)
+  cachedGqlTypes.set(name, target)
 
   const storage: Map<string, AnyClass> = new Map()
   storage.set('', target)
@@ -151,7 +151,7 @@ const registerType = (target: AnyClass<IDto>, type: 'input' | 'output') => {
       class Placeholder {}
 
       cachedGqlTypes.set(name, Placeholder)
-      classDecorator(name, { isAbstract: true, description: schema.description })(Placeholder)
+      classDecorator(name, { isAbstract, description: schema.description })(Placeholder)
       Object.defineProperty(Placeholder, 'name', { value: name })
       storage.set(path.join('.'), Placeholder)
       nestedGqlType = Placeholder
@@ -166,10 +166,10 @@ const registerType = (target: AnyClass<IDto>, type: 'input' | 'output') => {
   })
 }
 
-export const registerInputType = (target: AnyClass<IDto>) => {
-  registerType(target, 'input')
+export const registerInputType = (target: AnyClass<IDto>, isAbstract: boolean = true) => {
+  registerType(target, 'input', isAbstract)
 }
 
-export const registerOutputType = (target: AnyClass<IDto>) => {
-  registerType(target, 'output')
+export const registerOutputType = (target: AnyClass<IDto>, isAbstract: boolean = true) => {
+  registerType(target, 'output', isAbstract)
 }

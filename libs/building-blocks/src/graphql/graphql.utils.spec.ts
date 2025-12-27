@@ -93,8 +93,9 @@ describe('GraphQL Transport Utils', () => {
     class Order extends Dto(OrderOutputSchema) {}
 
     it('should generate correct GraphQL schema with all types', async () => {
-      registerInputType(CreateOrderInput)
-      registerOutputType(Order)
+      // For testing purposes, we are registering the types as non-abstract
+      registerInputType(CreateOrderInput, false)
+      registerOutputType(Order, false)
 
       class MockResolver {
         @Query(() => Order)
