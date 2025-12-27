@@ -5,7 +5,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { Inject } from '@nestjs/common/decorators'
 import { ResultAsync } from 'neverthrow'
 
-import { UserDto } from '#/application/shared/auth.interface'
+import { mapUserToUserDto, UserDto } from '#/application/shared/auth.interface'
 import { IUserRepository, UserError, UserId } from '#/domain'
 
 export class GetMeQuery extends BaseQuery<ResultAsync<UserDto, UserError>> {}
@@ -37,18 +37,6 @@ export class GetMeHandler extends QueryHandler(GetMeQuery) {
       userId
     })
 
-    return this.userRepository
-      .findById(userId as UserId)
-      .map((user) => user.toObject())
-      .map((user) =>
-        UserDto.create({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          gender: user.gender,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt
-        })
-      )
+    return this.userRepository.findById(userId as UserId).map((user) => UserDto.create(mapUserToUserDto(user)))
   }
 }

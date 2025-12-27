@@ -1,9 +1,9 @@
 import { registerOutputType } from '@internal/building-blocks/graphql'
-import { Dto } from '@internal/common'
+import { createMapper, Dto } from '@internal/common'
 
 import { z } from 'zod'
 
-import { GenderEnum, UserId } from '#/domain'
+import { GenderEnum, User, UserId } from '#/domain'
 
 export class UserDto extends Dto(
   z
@@ -29,3 +29,5 @@ export class AuthTokenDto extends Dto(
 
 registerOutputType(UserDto)
 registerOutputType(AuthTokenDto)
+
+export const mapUserToUserDto = createMapper(User.$schema, UserDto.$schema).build()
