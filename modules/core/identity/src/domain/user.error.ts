@@ -1,30 +1,38 @@
+export enum UserErrorCode {
+  Invalid = 'Invalid',
+  NotFound = 'NotFound',
+  AlreadyExists = 'AlreadyExists',
+  InvalidCredentials = 'InvalidCredentials',
+  EmailAlreadyExists = 'EmailAlreadyExists'
+}
+
 export class UserError extends Error {
   type = 'UserError'
-  code: string
+  code: UserErrorCode
 
-  constructor(code: string, message: string) {
+  constructor(code: UserErrorCode, message: string) {
     super(message)
     this.code = code
   }
 
   static invalid(): UserError {
-    return new UserError('Invalid', 'Invalid user')
+    return new UserError(UserErrorCode.Invalid, 'Invalid user')
   }
 
   static notFound(): UserError {
-    return new UserError('UserNotFound', 'User not found')
+    return new UserError(UserErrorCode.NotFound, 'User not found')
   }
 
   static alreadyExists(): UserError {
-    return new UserError('UserAlreadyExists', 'User already exists')
+    return new UserError(UserErrorCode.AlreadyExists, 'User already exists')
   }
 
   static invalidCredentials(): UserError {
-    return new UserError('InvalidCredentials', 'Invalid email or password')
+    return new UserError(UserErrorCode.InvalidCredentials, 'Invalid email or password')
   }
 
   static emailAlreadyExists(): UserError {
-    return new UserError('EmailAlreadyExists', 'Email already exists')
+    return new UserError(UserErrorCode.EmailAlreadyExists, 'Email already exists')
   }
 
   toJSON(): Record<string, unknown> {

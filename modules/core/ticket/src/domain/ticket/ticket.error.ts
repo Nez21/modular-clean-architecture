@@ -1,34 +1,43 @@
+export enum TicketErrorCode {
+  Invalid = 'Invalid',
+  NotFound = 'NotFound',
+  AlreadyExists = 'AlreadyExists',
+  InvalidStatusTransition = 'InvalidStatusTransition',
+  NotAssigned = 'NotAssigned',
+  AlreadyAssigned = 'AlreadyAssigned'
+}
+
 export class TicketError extends Error {
   type = 'TicketError'
-  code: string
+  code: TicketErrorCode
 
-  constructor(code: string, message: string) {
+  constructor(code: TicketErrorCode, message: string) {
     super(message)
     this.code = code
   }
 
   static invalid(): TicketError {
-    return new TicketError('Invalid', 'Invalid ticket')
+    return new TicketError(TicketErrorCode.Invalid, 'Invalid ticket')
   }
 
   static notFound(): TicketError {
-    return new TicketError('TicketNotFound', 'Ticket not found')
+    return new TicketError(TicketErrorCode.NotFound, 'Ticket not found')
   }
 
   static alreadyExists(): TicketError {
-    return new TicketError('TicketAlreadyExists', 'Ticket already exists')
+    return new TicketError(TicketErrorCode.AlreadyExists, 'Ticket already exists')
   }
 
   static invalidStatusTransition(): TicketError {
-    return new TicketError('InvalidStatusTransition', 'Invalid status transition')
+    return new TicketError(TicketErrorCode.InvalidStatusTransition, 'Invalid status transition')
   }
 
   static notAssigned(): TicketError {
-    return new TicketError('TicketNotAssigned', 'Ticket is not assigned')
+    return new TicketError(TicketErrorCode.NotAssigned, 'Ticket is not assigned')
   }
 
   static alreadyAssigned(): TicketError {
-    return new TicketError('TicketAlreadyAssigned', 'Ticket is already assigned')
+    return new TicketError(TicketErrorCode.AlreadyAssigned, 'Ticket is already assigned')
   }
 
   toJSON(): Record<string, unknown> {
