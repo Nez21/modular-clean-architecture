@@ -1,10 +1,16 @@
 {
   "name": "@internal/common",
   "version": "1.0.0",
-  "private": true,
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "@as-integrations/express5": "1.1.2",
+    "@nestjs/common": "11.1.10",
+    "reflect-metadata": "0.2.2",
+    "string-ts": "2.3.1",
+    "superjson": "2.2.2",
+    "tslib": "2.8.1",
+    "uuid": "11.0.0",
+    "zod": "4.2.1"
+  },
   "exports": {
     "./package.json": "./package.json",
     ".": {
@@ -17,13 +23,8 @@
     "dist",
     "src/types/**/*.d.ts"
   ],
-  "dependencies": {
-    "@nestjs/common": "11.1.6",
-    "reflect-metadata": "0.2.2",
-    "string-ts": "2.2.1",
-    "superjson": "2.2.2",
-    "tslib": "2.8.1",
-    "uuid": "13.0.0",
-    "zod": "4.1.11"
-  }
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "private": true,
+  "types": "./dist/index.d.ts"
 }

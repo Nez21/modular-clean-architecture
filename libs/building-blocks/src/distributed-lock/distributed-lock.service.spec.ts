@@ -14,7 +14,7 @@ describe('DistributedLockService', () => {
   let valkeyClient: ValkeyClient
 
   beforeAll(async () => {
-    container = await new ValkeyContainer().start()
+    container = await new ValkeyContainer('valkey/valkey:9').start()
   }, 60 * 1000)
 
   afterAll(async () => {

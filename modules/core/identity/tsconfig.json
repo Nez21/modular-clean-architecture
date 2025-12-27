@@ -4,12 +4,6 @@
   "include": [],
   "references": [
     {
-      "path": "../../../libs/building-blocks"
-    },
-    {
-      "path": "../../../libs/common"
-    },
-    {
       "path": "./tsconfig.lib.json"
     },
     {

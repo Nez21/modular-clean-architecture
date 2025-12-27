@@ -5,8 +5,8 @@ export const CurrentRequestContext = Symbol('CurrentRequestContext')
 export interface IRequestContext {
   tenantId: string
   idempotencyKey: string | undefined
-  userId: string | undefined
-  email: string | undefined
+  userId?: string
+  email?: string
 }
 
 export interface IRequestContextService {

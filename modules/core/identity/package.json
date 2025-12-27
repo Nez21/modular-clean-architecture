@@ -1,10 +1,23 @@
 {
   "name": "@internal/identity-module",
   "version": "1.0.0",
-  "private": true,
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "@internal/building-blocks": "workspace:^",
+    "@internal/common": "workspace:^",
+    "@nestjs/common": "11.1.10",
+    "@nestjs/graphql": "13.2.3",
+    "bcrypt": "6.0.0",
+    "drizzle-orm": "0.45.1",
+    "ms": "2.1.3",
+    "neverthrow": "8.2.0",
+    "reflect-metadata": "0.2.2",
+    "tslib": "2.8.1",
+    "zod": "4.2.1"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "~6.0.0",
+    "@types/ms": "~2.1.0"
+  },
   "exports": {
     "./package.json": "./package.json",
     ".": {
@@ -13,21 +26,8 @@
       "default": "./dist/index.js"
     }
   },
-  "dependencies": {
-    "@internal/building-blocks": "workspace:^",
-    "@internal/common": "workspace:^",
-    "@nestjs/common": "11.1.6",
-    "@nestjs/graphql": "13.1.0",
-    "bcrypt": "5.1.1",
-    "drizzle-orm": "0.44.5",
-    "ms": "2.1.3",
-    "neverthrow": "8.2.0",
-    "reflect-metadata": "0.2.2",
-    "tslib": "2.8.1",
-    "zod": "4.1.11"
-  },
-  "devDependencies": {
-    "@types/bcrypt": "~5.0.2",
-    "@types/ms": "~2.1.0"
-  }
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "private": true,
+  "types": "./dist/index.d.ts"
 }

@@ -21,7 +21,7 @@ describe('UseIdempotent', () => {
   let container: StartedValkeyContainer
   let testClass: TestClass
   beforeAll(async () => {
-    container = await new ValkeyContainer().start()
+    container = await new ValkeyContainer('valkey/valkey:9').start()
   }, 60 * 1000)
 
   afterAll(async () => {
@@ -41,7 +41,8 @@ describe('UseIdempotent', () => {
             current: {
               tenantId: 'test-tenant-id',
               idempotencyKey: undefined
-            }
+            },
+            register: vi.fn()
           }
         })
       ]
@@ -104,7 +105,8 @@ describe('UseIdempotent', () => {
               current: {
                 tenantId: 'test-tenant-id',
                 idempotencyKey: undefined
-              }
+              },
+              register: vi.fn()
             }
           })
         ]
