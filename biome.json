@@ -52,6 +52,9 @@
       "style": {
         "useImportType": "off"
       },
+      "suspicious": {
+        "useIterableCallbackReturn": "off"
+      },
       "recommended": true
     }
   },

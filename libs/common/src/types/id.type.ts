@@ -13,20 +13,31 @@ declare module 'zod' {
   }
 }
 
-type IdSchema<TBrand extends string, TPrefix extends string> = zodCore.$ZodBranded<
-  z.ZodLiteral<`${TPrefix}_${string}`>,
-  Branded<`${TPrefix}_${string}`, TBrand>
+type IdSchema<TBrand extends string, TPrefix extends string> = z.ZodCodec<
+  z.ZodUUID,
+  PropertyKey extends TBrand
+    ? z.ZodCustom<`${TPrefix}_${string}`>
+    : zodCore.$ZodBranded<z.ZodCustom<`${TPrefix}_${string}`>, TBrand>
 >
 
 export const createIdSchema = <TBrand extends string, TPrefix extends string>(brand: TBrand, prefix: TPrefix) =>
-  z.literal(`${prefix}_${z.uuid()}`).meta({ idSchema: { brand, prefix } }).brand<TBrand>()
+  z.codec(
+    z.uuid(),
+    z
+      .custom<`${TPrefix}_${string}`>((data) => {
+        if (typeof data !== 'string') return false
+        const [rawPrefix, rawUuid] = data.split('_')
+        return rawPrefix === prefix && z.uuid().safeParse(rawUuid).success
+      })
+      .meta({ idSchema: { brand, prefix } })
+      .brand<TBrand>(),
+    {
+      encode: (id) => id.split('_')[1],
+      decode: (id) => `${prefix}_${id}` as any
+    }
+  )
 
-export const encodeId = <TSchema extends IdSchema<string, string>>(schema: TSchema, id: string) =>
-  `${schema.meta()!.idSchema!.prefix}_${id}` as z.infer<TSchema>
-
-export const decodeId = <TSchema extends IdSchema<string, string>>(schema: TSchema, id: z.infer<TSchema>) =>
-  schema.parse(id).split('_')[1]
-
-export const generateId = <TSchema extends IdSchema<string, string>>(schema: TSchema) => encodeId(schema, v7())
+export const generateId = <TSchema extends IdSchema<string, string>>(schema: TSchema) =>
+  schema.decode(v7() as z.input<TSchema>)
 
 export const generateRawId = () => v7()

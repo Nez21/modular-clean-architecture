@@ -1,21 +1,23 @@
 import { IChangeTracker } from '@internal/building-blocks/change-tracker'
 import { IMediator } from '@internal/building-blocks/mediator'
 import { isPostgresError, PostgresErrorCode } from '@internal/building-blocks/postgres'
-import { decodeId, encodeId, isEmptyObject } from '@internal/common'
+import { createMapper, isEmptyObject } from '@internal/common'
 
 import { Injectable, Logger } from '@nestjs/common'
 import { Inject } from '@nestjs/common/decorators'
 import { eq } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { errAsync, ok, okAsync, ResultAsync } from 'neverthrow'
 
-import { UserId } from '#/domain/shared'
-import { ITicketRepository, Ticket, TicketError, TicketId, TicketStatus } from '#/domain/ticket'
-import { TicketCategoryId } from '#/domain/ticket-category'
+import { ITicketRepository, Ticket, TicketError, TicketId } from '#/domain/ticket'
 
 import { Database } from '../postgres-data.const'
 import * as schema from '../postgres-data.schema'
 import { tickets } from '../postgres-data.schema'
+
+const mapTicketModelToEntity = createMapper(createSelectSchema(tickets), Ticket.$schema).build()
+const mapEntityToTicketModel = createMapper(Ticket.$schema, createInsertSchema(tickets)).build()
 
 @Injectable()
 export class TicketRepository implements ITicketRepository {
@@ -28,41 +30,11 @@ export class TicketRepository implements ITicketRepository {
   ) {}
 
   toEntity(ticket: typeof tickets.$inferSelect): Ticket {
-    return Ticket.fromObject({
-      id: encodeId(TicketId, ticket.id),
-      subject: ticket.subject,
-      description: ticket.description,
-      status: ticket.status as TicketStatus,
-      priority: ticket.priority,
-      type: ticket.type,
-      customerId: encodeId(UserId, ticket.customerId),
-      assignedAgentId: ticket.assignedAgentId ? encodeId(UserId, ticket.assignedAgentId) : null,
-      categoryId: ticket.categoryId ? encodeId(TicketCategoryId, ticket.categoryId) : null,
-      createdAt: ticket.createdAt,
-      updatedAt: ticket.updatedAt,
-      resolvedAt: ticket.resolvedAt,
-      closedAt: ticket.closedAt
-    })
+    return Ticket.fromObject(mapTicketModelToEntity(ticket))
   }
 
   fromEntity(ticket: Ticket): typeof tickets.$inferInsert {
-    const obj = ticket.toObject()
-
-    return {
-      id: decodeId(TicketId, obj.id),
-      subject: obj.subject,
-      description: obj.description,
-      status: obj.status,
-      priority: obj.priority,
-      type: obj.type,
-      customerId: decodeId(UserId, obj.customerId),
-      assignedAgentId: obj.assignedAgentId ? decodeId(UserId, obj.assignedAgentId) : null,
-      categoryId: obj.categoryId ? decodeId(TicketCategoryId, obj.categoryId) : null,
-      createdAt: obj.createdAt,
-      updatedAt: obj.updatedAt,
-      resolvedAt: obj.resolvedAt,
-      closedAt: obj.closedAt
-    }
+    return mapEntityToTicketModel(ticket.toObject())
   }
 
   findById(id: TicketId): ResultAsync<Ticket, TicketError> {
@@ -70,9 +42,9 @@ export class TicketRepository implements ITicketRepository {
       message: `[FIND] Ticket #${id}`
     })
 
-    const decodedId = decodeId(TicketId, id)
+    const encodedId = TicketId.encode(id)
 
-    return ResultAsync.fromPromise(this.db.query.tickets.findFirst({ where: eq(tickets.id, decodedId) }), (error) => {
+    return ResultAsync.fromPromise(this.db.query.tickets.findFirst({ where: eq(tickets.id, encodedId) }), (error) => {
       this.logger.error({
         message: `[FIND] Ticket #${id} failed with database error`,
         error
@@ -116,9 +88,9 @@ export class TicketRepository implements ITicketRepository {
       return this.publishDomainEvents(ticket)
     }
 
-    const decodedId = decodeId(TicketId, ticket.id)
+    const encodedId = TicketId.encode(ticket.id)
 
-    return ResultAsync.fromPromise(this.db.update(tickets).set(patch).where(eq(tickets.id, decodedId)), (error) => {
+    return ResultAsync.fromPromise(this.db.update(tickets).set(patch).where(eq(tickets.id, encodedId)), (error) => {
       this.logger.error({
         message: `[UPDATE] Ticket #${ticket.id} failed with database error`,
         error
@@ -136,9 +108,9 @@ export class TicketRepository implements ITicketRepository {
       message: `[DELETE] Ticket #${id}`
     })
 
-    const decodedId = decodeId(TicketId, id)
+    const encodedId = TicketId.encode(id)
 
-    return ResultAsync.fromPromise(this.db.delete(tickets).where(eq(tickets.id, decodedId)), (error) => {
+    return ResultAsync.fromPromise(this.db.delete(tickets).where(eq(tickets.id, encodedId)), (error) => {
       this.logger.error({
         message: `[DELETE] Ticket #${id} failed with database error`,
         error

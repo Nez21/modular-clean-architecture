@@ -1,11 +1,12 @@
 import { IChangeTracker } from '@internal/building-blocks/change-tracker'
 import { isPostgresError, PostgresErrorCode } from '@internal/building-blocks/postgres'
-import { decodeId, encodeId, isEmptyObject } from '@internal/common'
+import { createMapper, isEmptyObject } from '@internal/common'
 
 import { Injectable, Logger } from '@nestjs/common'
 import { Inject } from '@nestjs/common/decorators'
 import { eq } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
+import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { errAsync, okAsync, ResultAsync } from 'neverthrow'
 
 import { IUserRepository, User, UserId } from '#/domain'
@@ -14,6 +15,9 @@ import { UserError } from '#/domain/user.error'
 import { Database } from '../postgres-data.const'
 import * as schema from '../postgres-data.schema'
 import { users } from '../postgres-data.schema'
+
+const mapUserModelToEntity = createMapper(createSelectSchema(users), User.$schema).build()
+const mapEntityToUserModel = createMapper(User.$schema, createInsertSchema(users)).build()
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -25,29 +29,11 @@ export class UserRepository implements IUserRepository {
   ) {}
 
   toEntity(user: typeof users.$inferSelect): User {
-    return User.fromObject({
-      id: encodeId(UserId, user.id),
-      name: user.name,
-      email: user.email,
-      passwordHash: user.passwordHash,
-      gender: user.gender,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt
-    })
+    return User.fromObject(mapUserModelToEntity(user))
   }
 
   fromEntity(user: User): typeof users.$inferInsert {
-    const obj = user.toObject()
-
-    return {
-      id: decodeId(UserId, obj.id),
-      name: obj.name,
-      email: obj.email,
-      passwordHash: obj.passwordHash,
-      gender: obj.gender,
-      createdAt: obj.createdAt,
-      updatedAt: obj.updatedAt
-    }
+    return mapEntityToUserModel(user.toObject())
   }
 
   findById(id: UserId): ResultAsync<User, UserError> {
@@ -55,9 +41,9 @@ export class UserRepository implements IUserRepository {
       message: `[FIND] User #${id}`
     })
 
-    const decodedId = decodeId(UserId, id)
+    const encodedId = UserId.encode(id)
 
-    return ResultAsync.fromPromise(this.db.query.users.findFirst({ where: eq(users.id, decodedId) }), (error) => {
+    return ResultAsync.fromPromise(this.db.query.users.findFirst({ where: eq(users.id, encodedId) }), (error) => {
       this.logger.error({
         message: `[FIND] User #${id} failed with database error`,
         error
@@ -120,9 +106,9 @@ export class UserRepository implements IUserRepository {
       return okAsync()
     }
 
-    const decodedId = decodeId(UserId, user.id)
+    const encodedId = UserId.encode(user.id)
 
-    return ResultAsync.fromPromise(this.db.update(users).set(patch).where(eq(users.id, decodedId)), (error) => {
+    return ResultAsync.fromPromise(this.db.update(users).set(patch).where(eq(users.id, encodedId)), (error) => {
       this.logger.error({
         message: `[UPDATE] User #${user.id} failed with database error`,
         error
@@ -139,9 +125,9 @@ export class UserRepository implements IUserRepository {
       message: `[DELETE] User #${id}`
     })
 
-    const decodedId = decodeId(UserId, id)
+    const encodedId = UserId.encode(id)
 
-    return ResultAsync.fromPromise(this.db.delete(users).where(eq(users.id, decodedId)), (error) => {
+    return ResultAsync.fromPromise(this.db.delete(users).where(eq(users.id, encodedId)), (error) => {
       this.logger.error({
         message: `[DELETE] User #${id} failed with database error`,
         error
