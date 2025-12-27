@@ -56,30 +56,6 @@ describe('ValueObject', () => {
       expect(address.street).toBe('123 Main St')
       expect(address.getFormattedAddress()).toBe('123 Main St, City, 12345, Country')
     })
-
-    it('should validate a value object', () => {
-      const address = Address.create({
-        street: '123 Main St',
-        city: 'City',
-        zipCode: '12345',
-        country: 'Country'
-      })
-
-      expect(() => {
-        address.validate()
-      }).not.toThrow()
-    })
-
-    it('should validate a value object asynchronously', async () => {
-      const address = Address.create({
-        street: '123 Main St',
-        city: 'City',
-        zipCode: '12345',
-        country: 'Country'
-      })
-
-      await expect(address.validateAsync()).resolves.not.toThrow()
-    })
   })
 
   describe('Immutability tests', () => {

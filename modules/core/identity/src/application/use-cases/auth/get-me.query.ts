@@ -3,7 +3,7 @@ import { IRequestContextService } from '@internal/building-blocks/request-contex
 
 import { Injectable, Logger } from '@nestjs/common'
 import { Inject } from '@nestjs/common/decorators'
-import { ResultAsync } from 'neverthrow'
+import { errAsync, ResultAsync } from 'neverthrow'
 
 import { mapUserToUserDto, UserDto } from '#/application/shared/auth.interface'
 import { IUserRepository, UserError, UserId } from '#/domain'
@@ -29,7 +29,7 @@ export class GetMeHandler extends QueryHandler(GetMeQuery) {
         message: '[GET_ME] User ID not found in request context'
       })
 
-      return ResultAsync.fromSafePromise(Promise.reject(UserError.invalidCredentials()))
+      return errAsync(UserError.invalidCredentials())
     }
 
     this.logger.debug({

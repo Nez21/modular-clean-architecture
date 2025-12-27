@@ -8,7 +8,7 @@ import { Inject } from '@nestjs/common/decorators'
 import { eq } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
-import { errAsync, ok, okAsync, ResultAsync } from 'neverthrow'
+import { errAsync, ok, okAsync, Result, ResultAsync } from 'neverthrow'
 
 import { ITicketRepository, Ticket, TicketError, TicketId } from '#/domain/ticket'
 
@@ -55,52 +55,46 @@ export class TicketRepository implements ITicketRepository {
   }
 
   insert(ticket: Ticket): ResultAsync<void, TicketError> {
-    this.logger.debug({
-      message: `[INSERT] Ticket #${ticket.id}`,
-      ticket
-    })
+    return this.validate(ticket).asyncAndThen((): ResultAsync<void, TicketError> => {
+      return ResultAsync.fromPromise(this.db.insert(tickets).values(this.fromEntity(ticket)), (error) => {
+        if (isPostgresError(error) && error.code === PostgresErrorCode.UniqueViolation) {
+          return TicketError.alreadyExists()
+        }
 
-    return ResultAsync.fromPromise(this.db.insert(tickets).values(this.fromEntity(ticket)), (error) => {
-      if (isPostgresError(error) && error.code === PostgresErrorCode.UniqueViolation) {
-        return TicketError.alreadyExists()
-      }
+        this.logger.error({
+          message: `[INSERT] Ticket #${ticket.id} failed with database error`,
+          error
+        })
 
-      this.logger.error({
-        message: `[INSERT] Ticket #${ticket.id} failed with database error`,
-        error
+        throw error
       })
-
-      throw error
+        .andThen(() => ok(this.changeTracker.attach(ticket)))
+        .andThen(() => this.publishDomainEvents(ticket))
     })
-      .andThen(() => ok(this.changeTracker.attach(ticket)))
-      .andThen(() => this.publishDomainEvents(ticket))
   }
 
   update(ticket: Ticket): ResultAsync<void, TicketError> {
-    const patch = this.changeTracker.toPatch(ticket)
+    return this.validate(ticket).asyncAndThen((): ResultAsync<void, TicketError> => {
+      const patch = this.changeTracker.toPatch(ticket)
 
-    this.logger.debug({
-      message: `[UPDATE] Ticket #${ticket.id}`,
-      patch
-    })
+      if (isEmptyObject(patch)) {
+        return this.publishDomainEvents(ticket)
+      }
 
-    if (isEmptyObject(patch)) {
-      return this.publishDomainEvents(ticket)
-    }
+      const encodedId = TicketId.encode(ticket.id)
 
-    const encodedId = TicketId.encode(ticket.id)
+      return ResultAsync.fromPromise(this.db.update(tickets).set(patch).where(eq(tickets.id, encodedId)), (error) => {
+        this.logger.error({
+          message: `[UPDATE] Ticket #${ticket.id} failed with database error`,
+          error
+        })
 
-    return ResultAsync.fromPromise(this.db.update(tickets).set(patch).where(eq(tickets.id, encodedId)), (error) => {
-      this.logger.error({
-        message: `[UPDATE] Ticket #${ticket.id} failed with database error`,
-        error
+        throw error
       })
-
-      throw error
+        .andThen((result) => (result.rowCount ? okAsync() : errAsync(TicketError.notFound())))
+        .andThen(() => ok(this.changeTracker.refresh(ticket)))
+        .andThen(() => this.publishDomainEvents(ticket))
     })
-      .andThen((result) => (result.rowCount ? okAsync() : errAsync(TicketError.notFound())))
-      .andThen(() => ok(this.changeTracker.refresh(ticket)))
-      .andThen(() => this.publishDomainEvents(ticket))
   }
 
   delete(id: TicketId): ResultAsync<void, TicketError> {
@@ -129,13 +123,33 @@ export class TicketRepository implements ITicketRepository {
 
     const publishPromises = domainEvents.map((event) => this.mediator.publish(event))
 
-    return ResultAsync.fromPromise(Promise.all(publishPromises), (error) => {
+    return ResultAsync.fromSafePromise(Promise.allSettled(publishPromises))
+      .andThen((results) => {
+        const errors = results.filter((result) => result.status === 'rejected').map((result) => result.reason)
+
+        if (errors.length > 0) {
+          this.logger.error({
+            message: '[PUBLISH] Failed to publish domain events',
+            errors
+          })
+
+          throw new AggregateError(errors, 'Failed to publish domain events')
+        }
+
+        return okAsync()
+      })
+      .andThen(() => ok(ticket.clearDomainEvents()))
+  }
+
+  private validate(ticket: Ticket): Result<void, TicketError> {
+    return ticket.validate().mapErr((error) => {
       this.logger.error({
-        message: '[PUBLISH] Failed to publish domain events',
+        message: `[VALIDATE] Ticket #${ticket.id} is invalid`,
+        ticket,
         error
       })
 
-      throw error
-    }).andThen(() => ok(ticket.clearDomainEvents()))
+      return TicketError.invalid()
+    })
   }
 }

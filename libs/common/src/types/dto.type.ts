@@ -1,5 +1,6 @@
 import { randomUUID, UUID } from 'node:crypto'
 
+import { err, ok, Result } from 'neverthrow'
 import { z } from 'zod'
 
 import { getTypedMetadata, MetadataKey, SetTypedMetadata } from '#/utils'
@@ -14,8 +15,7 @@ const MetadataKeys = {
 export interface IDto<TSchema extends z.ZodObject = z.ZodObject<Record<string, z.ZodType<any>>>> {
   [Schema]?: TSchema
 
-  validate(): void
-  validateAsync(): Promise<void>
+  validate(): Result<void, z.ZodError>
 }
 
 export type DtoSchemaOf<T extends IDto> = NonNullable<T[typeof Schema]>
@@ -53,12 +53,14 @@ export function Dto<TSchema extends z.ZodObject, TBase extends object>(
       return schema
     }
 
-    validate(): void {
-      schema.parse(this)
-    }
+    validate(): Result<void, z.ZodError> {
+      const result = schema.safeParse(this)
 
-    async validateAsync(): Promise<void> {
-      await schema.parseAsync(this)
+      if (!result.success) return err(result.error)
+
+      Object.assign(this, result.data)
+
+      return ok()
     }
   }
 

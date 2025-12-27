@@ -7,6 +7,10 @@ export class TicketError extends Error {
     this.code = code
   }
 
+  static invalid(): TicketError {
+    return new TicketError('Invalid', 'Invalid ticket')
+  }
+
   static notFound(): TicketError {
     return new TicketError('TicketNotFound', 'Ticket not found')
   }

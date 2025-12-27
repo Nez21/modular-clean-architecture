@@ -1,5 +1,6 @@
 import { randomUUID, UUID } from 'node:crypto'
 
+import { err, ok, Result } from 'neverthrow'
 import { z } from 'zod'
 
 import { DeepReadonly, getTypedMetadata, MetadataKey, SetTypedMetadata, serialize } from '#/utils'
@@ -17,8 +18,7 @@ export interface IEntity<TSchema extends z.ZodObject = z.ZodObject, TKeyAttribut
   readonly [Schema]?: TSchema
   readonly [KeyAttributes]?: TKeyAttributes
 
-  validate(): void
-  validateAsync(): Promise<void>
+  validate(): Result<void, z.ZodError>
   equals<T extends IEntity>(this: T, other: T): boolean
   toJSON(): string
 }
@@ -68,12 +68,14 @@ export function Entity<
       return schema
     }
 
-    validate(): void {
-      schema.parse(this)
-    }
+    validate(): Result<void, z.ZodError> {
+      const result = schema.safeParse(this)
 
-    async validateAsync(): Promise<void> {
-      await schema.parseAsync(this)
+      if (!result.success) return err(result.error)
+
+      Object.assign(this['$value'], result.data)
+
+      return ok()
     }
 
     equals<T extends IEntity>(this: T, other: T): boolean {

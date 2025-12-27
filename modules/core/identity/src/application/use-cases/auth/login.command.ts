@@ -5,7 +5,7 @@ import { Dto } from '@internal/common'
 
 import { Injectable, Logger } from '@nestjs/common'
 import { Inject } from '@nestjs/common/decorators'
-import { errAsync, okAsync, ResultAsync } from 'neverthrow'
+import { errAsync, ResultAsync } from 'neverthrow'
 import { z } from 'zod'
 
 import { IPasswordService } from '#/application/services/password.service.interface'

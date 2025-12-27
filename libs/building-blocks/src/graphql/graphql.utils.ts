@@ -3,7 +3,7 @@ import { DtoUtils, type IDto, traversalSchema } from '@internal/common'
 import type { NullableList } from '@nestjs/graphql'
 import { Field, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
 import type { GraphQLScalarType } from 'graphql'
-import { GraphQLBoolean, GraphQLFloat, GraphQLInt, GraphQLString } from 'graphql'
+import { GraphQLBoolean, GraphQLFloat, GraphQLID, GraphQLInt, GraphQLString } from 'graphql'
 import { GraphQLBigInt, GraphQLDateTime, GraphQLEmailAddress, GraphQLURL, GraphQLUUID } from 'graphql-scalars'
 import z from 'zod'
 
@@ -96,6 +96,16 @@ const getScalarType = (schema: z.ZodType, metadata?: GraphQLMetadata): GraphQLSc
       }
       case z.ZodEnum.name: {
         return getCachedZodGqlType(schema)
+      }
+      case z.ZodCodec.name: {
+        const codec = schema as z.ZodCodec
+        const output = codec.out
+
+        if (output.constructor.name === z.ZodCustom.name && (output as z.ZodCustom).meta()?.idSchema) {
+          return GraphQLID
+        }
+
+        throw new Error(`Unsupported schema type: ${output.constructor.name}`)
       }
     }
   }

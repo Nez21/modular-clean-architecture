@@ -70,31 +70,14 @@ describe('Dto Type', () => {
     it('should validate valid Dto', () => {
       const dto = TestDto.create(validDtoData)
 
-      expect(() => {
-        dto.validate()
-      }).not.toThrow()
+      expect(dto.validate().isOk()).toBe(true)
     })
 
     it('should throw error when validating invalid Dto', () => {
       const dto = TestDto.create(validDtoData)
       dto.name = 'T'
 
-      expect(() => {
-        dto.validate()
-      }).toThrow()
-    })
-
-    it('should validate valid Dto asynchronously', async () => {
-      const dto = TestDto.create(validDtoData)
-
-      await expect(dto.validateAsync()).resolves.not.toThrow()
-    })
-
-    it('should throw error when validating invalid Dto asynchronously', async () => {
-      const dto = TestDto.create(validDtoData)
-      dto.name = 'T'
-
-      await expect(dto.validateAsync()).rejects.toThrow()
+      expect(dto.validate().isErr()).toBe(true)
     })
   })
 

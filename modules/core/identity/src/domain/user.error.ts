@@ -7,6 +7,10 @@ export class UserError extends Error {
     this.code = code
   }
 
+  static invalid(): UserError {
+    return new UserError('Invalid', 'Invalid user')
+  }
+
   static notFound(): UserError {
     return new UserError('UserNotFound', 'User not found')
   }

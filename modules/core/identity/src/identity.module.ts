@@ -1,6 +1,4 @@
-import { GraphQLTransportModule } from '@internal/building-blocks/graphql'
-
-import { type DynamicModule, Module } from '@nestjs/common'
+import { type DynamicModule } from '@nestjs/common'
 
 import { AuthResolver } from './api/resolvers'
 import { IPasswordService } from './application/services/password.service.interface'

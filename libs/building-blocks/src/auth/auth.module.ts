@@ -1,8 +1,6 @@
 import { type DynamicModule } from '@nestjs/common'
 import ms from 'ms'
 
-import { RequestContextModule } from '#/request-context'
-
 import { AuthGuard } from './guards'
 import { IJwtService, JwtService, JwtServiceOptions } from './jwt'
 

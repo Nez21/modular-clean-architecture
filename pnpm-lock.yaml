@@ -296,6 +296,9 @@ importers:
       '@nestjs/common':
         specifier: 11.1.10
         version: 11.1.10(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      neverthrow:
+        specifier: 8.2.0
+        version: 8.2.0
       reflect-metadata:
         specifier: 0.2.2
         version: 0.2.2

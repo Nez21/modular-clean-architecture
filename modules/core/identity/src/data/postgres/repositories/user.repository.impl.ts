@@ -7,7 +7,7 @@ import { Inject } from '@nestjs/common/decorators'
 import { eq } from 'drizzle-orm'
 import { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
-import { errAsync, okAsync, ResultAsync } from 'neverthrow'
+import { errAsync, okAsync, Result, ResultAsync } from 'neverthrow'
 
 import { IUserRepository, User, UserId } from '#/domain'
 import { UserError } from '#/domain/user.error'
@@ -69,55 +69,46 @@ export class UserRepository implements IUserRepository {
   }
 
   insert(user: User): ResultAsync<void, UserError> {
-    this.logger.debug({
-      message: `[INSERT] User #${user.id}`,
-      user
-    })
+    return this.validate(user).asyncAndThen((): ResultAsync<void, UserError> => {
+      return ResultAsync.fromPromise(this.db.insert(users).values(this.fromEntity(user)), (error) => {
+        if (isPostgresError(error) && error.code === PostgresErrorCode.UniqueViolation) {
+          if (error.constraint?.includes('email')) {
+            return UserError.emailAlreadyExists()
+          }
 
-    return ResultAsync.fromPromise(this.db.insert(users).values(this.fromEntity(user)), (error) => {
-      if (isPostgresError(error) && error.code === PostgresErrorCode.UniqueViolation) {
-        // Check if it's an email violation
-        if (error.constraint?.includes('email')) {
-          return UserError.emailAlreadyExists()
+          return UserError.alreadyExists()
         }
-        return UserError.alreadyExists()
-      }
 
-      this.logger.error({
-        message: `[INSERT] User #${user.id} failed with database error`,
-        error
-      })
+        this.logger.error({
+          message: `[INSERT] User #${user.id} failed with database error`,
+          error
+        })
 
-      throw error
+        throw error
+      }).andThen(() => okAsync(void this.changeTracker.attach(user)))
     })
-      .andTee(() => this.changeTracker.attach(user))
-      .map(() => void 0)
   }
 
   update(user: User): ResultAsync<void, UserError> {
-    const patch = this.changeTracker.toPatch(user)
+    return this.validate(user).asyncAndThen((): ResultAsync<void, UserError> => {
+      const patch = this.changeTracker.toPatch(user)
 
-    this.logger.debug({
-      message: `[UPDATE] User #${user.id}`,
-      patch
-    })
+      if (isEmptyObject(patch)) {
+        return okAsync()
+      }
 
-    if (isEmptyObject(patch)) {
-      return okAsync()
-    }
+      const encodedId = UserId.encode(user.id)
 
-    const encodedId = UserId.encode(user.id)
-
-    return ResultAsync.fromPromise(this.db.update(users).set(patch).where(eq(users.id, encodedId)), (error) => {
-      this.logger.error({
-        message: `[UPDATE] User #${user.id} failed with database error`,
-        error
+      return ResultAsync.fromPromise(this.db.update(users).set(patch).where(eq(users.id, encodedId)), (error) => {
+        this.logger.error({
+          message: `[UPDATE] User #${user.id} failed with database error`,
+          error
+        })
+        throw error
       })
-
-      throw error
+        .andThen((result) => (result.rowCount ? okAsync() : errAsync(UserError.notFound())))
+        .andTee(() => this.changeTracker.refresh(user))
     })
-      .andThen((result) => (result.rowCount ? okAsync() : errAsync(UserError.notFound())))
-      .andTee(() => this.changeTracker.refresh(user))
   }
 
   delete(id: UserId): ResultAsync<void, UserError> {
@@ -137,5 +128,17 @@ export class UserRepository implements IUserRepository {
     })
       .andThen((result) => (result.rowCount ? okAsync() : errAsync(UserError.notFound())))
       .andTee(() => this.changeTracker.detach(User, { id }))
+  }
+
+  private validate(user: User): Result<void, UserError> {
+    return user.validate().mapErr((error) => {
+      this.logger.error({
+        message: `[VALIDATE] User #${user.id} is invalid`,
+        user,
+        error
+      })
+
+      return UserError.invalid()
+    })
   }
 }

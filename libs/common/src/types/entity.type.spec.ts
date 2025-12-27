@@ -72,14 +72,7 @@ describe('Entity Type', () => {
   describe('Entity Validation', () => {
     it('should validate a valid entity', () => {
       const entity = TestEntity.fromObject(validEntityData)
-      expect(() => {
-        entity.validate()
-      }).not.toThrow()
-    })
-
-    it('should validate asynchronously', async () => {
-      const entity = TestEntity.fromObject(validEntityData)
-      await expect(entity.validateAsync()).resolves.toBeUndefined()
+      expect(entity.validate().isOk()).toBe(true)
     })
 
     it('should throw error when validating an invalid entity', () => {
@@ -87,9 +80,7 @@ describe('Entity Type', () => {
 
       entity.setAge(-1)
 
-      expect(() => {
-        entity.validate()
-      }).toThrow()
+      expect(entity.validate().isErr()).toBe(true)
     })
   })
 
@@ -200,9 +191,7 @@ describe('Entity Type', () => {
 
       const entity = TestComplexEntity.fromObject(complexData)
       expect(entity).toBeInstanceOf(TestComplexEntity)
-      expect(() => {
-        entity.validate()
-      }).not.toThrow()
+      expect(entity.validate().isOk()).toBe(true)
     })
   })
 
@@ -220,9 +209,7 @@ describe('Entity Type', () => {
         value: 'not a number'
       })
 
-      expect(() => {
-        entity.validate()
-      }).toThrow()
+      expect(entity.validate().isErr()).toBe(true)
     })
 
     it('should fail when using EntityUtils.assert with non-entity objects', () => {

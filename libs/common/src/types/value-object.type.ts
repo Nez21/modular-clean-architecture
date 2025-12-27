@@ -14,8 +14,6 @@ const MetadataKeys = {
 export interface IValueObject<TSchema extends z.ZodObject = z.ZodObject<Record<string, z.ZodType<any>>>> {
   [Schema]?: TSchema
 
-  validate(): void
-  validateAsync(): Promise<void>
   equals<T extends IValueObject>(this: T, other: T): boolean
 }
 
@@ -48,14 +46,6 @@ export function ValueObject<TSchema extends z.ZodObject>(schema: TSchema) {
 
     static get $schema(): TSchema {
       return schema
-    }
-
-    validate(): void {
-      schema.parse(this)
-    }
-
-    async validateAsync(): Promise<void> {
-      await schema.parseAsync(this)
     }
 
     equals<T extends IValueObject>(

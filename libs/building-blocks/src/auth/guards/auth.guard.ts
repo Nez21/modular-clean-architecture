@@ -1,4 +1,4 @@
-import { IRequestContext, IRequestContextService } from '@internal/building-blocks/request-context'
+import { IRequestContextService } from '@internal/building-blocks/request-context'
 
 import { CanActivate, ExecutionContext, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { Inject } from '@nestjs/common/decorators'
