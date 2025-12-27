@@ -75,3 +75,5 @@ type Action<T> = (() => Promise<T>) | (() => T)
 type NodeEnv = 'development' | 'production'
 
 type DeepPartial<T> = T extends object ? { [P in keyof T]?: DeepPartial<T[P]> } : T
+
+type StringKeysOf<T> = T extends object ? (keyof T extends string ? keyof T : never) : never

@@ -1,21 +1,22 @@
+/** biome-ignore-all lint/correctness/noUnusedVariables: False positive */
 import { core as zCore } from 'zod/v4'
 
 export type ReadonlyDate = Omit<Date, `set${string}`>
 
-export type DeepReadonly<T> = T extends (infer R)[]
+export type DeepReadonly<T> = T extends { [zCore.$brand]: infer U }
+  ? T extends Branded<infer R, StringKeysOf<U>>
+    ? Branded<InternalDeepReadonly<R>, StringKeysOf<U>>
+    : never
+  : InternalDeepReadonly<T>
+
+type InternalDeepReadonly<T> = T extends (infer R)[]
   ? ReadonlyArray<DeepReadonly<R>>
   : T extends Function
     ? T
     : T extends Date
       ? ReadonlyDate
       : T extends object
-        ? {
-            readonly [P in keyof T]: T[P] extends { [zCore.$brand]: infer U }
-              ? T[P] extends infer R & { [zCore.$brand]: U }
-                ? Branded<DeepReadonly<R>, U extends object ? (keyof U extends string ? keyof U : never) : never>
-                : DeepReadonly<T[P]>
-              : DeepReadonly<T[P]>
-          }
+        ? { readonly [P in keyof T]: DeepReadonly<T[P]> }
         : T
 
 export const deepFreeze = <T extends object>(obj: T): DeepReadonly<T> => {
