@@ -19,7 +19,7 @@ export interface DiffChange {
 
 export type Diff = DiffCreate | DiffRemove | DiffChange
 
-const richTypes = new Set<Function>([Date, String, Number])
+const richTypes = new Set<Function>([Date])
 
 export const diff = (
   obj: Record<string, unknown> | unknown[],

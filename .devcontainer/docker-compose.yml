@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  devcontainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspace:cached
+    command: sleep infinity
+    networks:
+      - dev-network
+    environment:
+      - NODE_ENV=development
+      - VALKEY_URL=redis://valkey:6379
+      - RESTATE_URL=http://restate:8080
+      - RESTATE_APP_PORT=4000
+      - IDENTITY_POSTGRES_URL=postgresql://postgres:postgres@postgres:5432/identity
+      - APP_PORT=3000
+      - APP_LOG_LEVEL=debug
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      restate:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - dev-network
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=identity
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  valkey:
+    image: valkey/valkey:7.2-alpine
+    restart: unless-stopped
+    volumes:
+      - valkey-data:/data
+    networks:
+      - dev-network
+    ports:
+      - "6379:6379"
+    command: valkey-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  restate:
+    image: restatedev/restate:latest
+    restart: unless-stopped
+    volumes:
+      - restate-data:/tmp/restate
+    networks:
+      - dev-network
+    ports:
+      - "8080:8080"
+    command:
+      - server
+      - --bind-address
+      - 0.0.0.0:8080
+      - --sqlite-path
+      - /tmp/restate/restate.db
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  dev-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  valkey-data:
+  restate-data:
+

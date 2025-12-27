@@ -14,7 +14,9 @@
   "dependencies": {
     "@internal/building-blocks": "workspace:^",
     "@internal/common": "workspace:^",
+    "@internal/shared-contract": "workspace:^",
     "@internal/identity-module": "workspace:^",
+    "@internal/ticket-module": "workspace:^",
     "@nestjs/common": "11.1.6",
     "@nestjs/core": "11.1.6",
     "@nestjs/platform-express": "11.1.6",

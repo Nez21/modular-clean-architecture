@@ -1,0 +1,93 @@
+{
+  "name": "Modular Clean Architecture",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "biomejs.biome",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-typescript-next",
+        "nrwl.angular-console",
+        "firsttris.vscode-jest-runner",
+        "vitest.explorer",
+        "ms-vscode.vscode-json",
+        "redhat.vscode-yaml",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens",
+        "github.copilot",
+        "github.copilot-chat"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "biomejs.biome",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "quickfix.biome": "explicit",
+          "source.organizeImports.biome": "explicit"
+        },
+        "[typescript]": {
+          "editor.defaultFormatter": "biomejs.biome"
+        },
+        "[javascript]": {
+          "editor.defaultFormatter": "biomejs.biome"
+        },
+        "[json]": {
+          "editor.defaultFormatter": "biomejs.biome"
+        },
+        "[jsonc]": {
+          "editor.defaultFormatter": "biomejs.biome"
+        },
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "typescript.enablePromptUseWorkspaceTsdk": true,
+        "files.watcherExclude": {
+          "**/.git/objects/**": true,
+          "**/.git/subtree-cache/**": true,
+          "**/node_modules/**": true,
+          "**/.nx/cache/**": true,
+          "**/dist/**": true,
+          "**/out-tsc/**": true
+        }
+      }
+    }
+  },
+
+  "forwardPorts": [3000, 4000, 5432, 6379, 8080],
+  "portsAttributes": {
+    "3000": {
+      "label": "Application",
+      "onAutoForward": "notify"
+    },
+    "4000": {
+      "label": "Restate App",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "silent"
+    },
+    "6379": {
+      "label": "Valkey",
+      "onAutoForward": "silent"
+    },
+    "8080": {
+      "label": "Restate",
+      "onAutoForward": "silent"
+    }
+  },
+
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+  "remoteUser": "node",
+  "remoteEnv": {
+    "NODE_ENV": "development"
+  }
+}

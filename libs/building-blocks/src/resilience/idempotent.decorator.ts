@@ -33,7 +33,7 @@ const defaultOptions: IdempotentOptions = {
   }
 }
 
-type TypedDecorator = TypedMethodDecorator<'extend', 'target', (...args: NonEmptyArray<any>) => Promise<any>>
+type TypedDecorator = TypedMethodDecorator<'extend', 'target', (...args: NonEmptyArray<any>) => PromiseLike<any>>
 
 export const UseIdempotent = (options?: Partial<IdempotentOptions>): TypedDecorator => {
   const idempotentOptions: IdempotentOptions = {

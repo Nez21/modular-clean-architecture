@@ -1,5 +1,9 @@
-import type { Diff, EntityType, IEntity, KeyOf } from '@internal/common'
+import type { Diff, EntityType, KeyOf } from '@internal/common'
 import { Token } from '@internal/common'
+
+export type Patch<T extends EntityType> = Partial<{
+  [K in keyof T['$value']]: IfEquals<NonNullable<T['$value'][K]>, T['$value'][K], T['$value'][K], T['$value'][K] | null>
+}>
 
 export interface IChangeTracker {
   attach(entity: EntityType): boolean
@@ -8,7 +12,8 @@ export interface IChangeTracker {
   refresh(entity: EntityType): void
   isTracked(entity: EntityType): boolean
   isChanged(entity: EntityType): boolean
-  diff(entity: IEntity, deep: boolean): Diff[] | undefined
+  diff(entity: EntityType, deep: boolean): Diff[] | undefined
+  toPatch<T extends EntityType>(entity: T): Patch<T>
   clear(): void
 }
 

@@ -34,7 +34,7 @@ export type EntityType<
 > = IEntity<TSchema, TKeyAttributes> & DeepReadonly<z.output<TSchema>> & ProtectedData<z.output<TSchema>>
 
 export class ProtectedData<T> {
-  protected data!: T
+  protected $value!: T
 }
 
 export function Entity<
@@ -52,19 +52,19 @@ export function Entity<
   @SetTypedMetadata(MetadataKeys.Schema, schema)
   @SetTypedMetadata(MetadataKeys.KeyAttributes, keyAttributes)
   abstract class BaseEntity implements IEntity<TSchema> {
-    static create<T extends IEntity & BaseEntity>(this: AnyClass<T>, obj: z.input<EntitySchemaOf<T>>): T {
+    static fromObject<T extends IEntity & BaseEntity>(this: AnyClass<T>, obj: z.input<EntitySchemaOf<T>>): T {
       // @ts-ignore
       const instance = new this() as T
-      instance['data'] = schema.parse(obj)
+      instance['$value'] = schema.parse(obj)
 
       return instance
     }
 
-    static get typeId(): UUID {
+    static get $typeId(): UUID {
       return typeId
     }
 
-    static get schema(): TSchema {
+    static get $schema(): TSchema {
       return schema
     }
 
@@ -80,15 +80,19 @@ export function Entity<
       return keyAttributes.every((key) => (this as Record<string, any>)[key] === (other as Record<string, any>)[key])
     }
 
+    toObject(): z.output<TSchema> {
+      return structuredClone(this['$value'])
+    }
+
     toJSON(): string {
-      return serialize(this['data'])
+      return serialize(this['$value'])
     }
   }
 
   for (const prop of Object.keys((schema as z.ZodObject).shape as Record<keyof z.output<TSchema>, z.ZodType>)) {
     Object.defineProperty(BaseEntity.prototype, prop, {
       get: function () {
-        return this.data[prop]
+        return this.$value[prop]
       }
     })
   }
@@ -100,7 +104,7 @@ export abstract class EntityUtils {
   static create<T extends IEntity>(cls: AnyClass<T>, obj: z.input<EntitySchemaOf<T>>): T {
     // @ts-ignore
     const instance = new cls() as T
-    instance['data'] = EntityUtils.getSchema(cls).parse(obj)
+    instance['$value'] = EntityUtils.getSchema(cls).parse(obj)
 
     return instance
   }

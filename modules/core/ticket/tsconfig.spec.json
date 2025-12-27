@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.lib.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/vitest",
+    "tsBuildInfoFile": "./out-tsc/vitest/tsconfig.spec.tsbuildinfo",
+    "types": ["vitest/globals", "node"]
+  },
+  "include": ["src/**/*.spec.ts", "src/**/*.test.ts", "vitest.config.mts"]
+}

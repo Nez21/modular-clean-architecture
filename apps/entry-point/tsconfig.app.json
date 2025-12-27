@@ -13,6 +13,9 @@
       "path": "../../libs/common/tsconfig.lib.json"
     },
     {
+      "path": "../../modules/core/ticket/tsconfig.lib.json"
+    },
+    {
       "path": "../../modules/core/identity/tsconfig.lib.json"
     },
     {

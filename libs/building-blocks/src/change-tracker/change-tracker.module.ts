@@ -9,6 +9,7 @@ import { IChangeTracker } from './change-tracker.interface'
 @Module({
   imports: [
     ClsModule.forRoot({
+      global: true,
       middleware: {
         mount: true,
         setup: (cls) => {

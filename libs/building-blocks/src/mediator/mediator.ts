@@ -64,7 +64,9 @@ export class Mediator implements IMediator, OnApplicationBootstrap {
           this.eventHandlers.set(eventType as AnyClass<BaseEvent>, handlers)
         }
 
-        Mediator.logger.log(`${eventTypes.join(', ')} {event} -> ${String(discoveredClass.injectType?.name)}`)
+        const eventTypesNames = eventTypes.map((eventType) => eventType.name).join(', ')
+
+        Mediator.logger.log(`${eventTypesNames} {event} -> ${String(discoveredClass.injectType?.name)}`)
       }
     }
 

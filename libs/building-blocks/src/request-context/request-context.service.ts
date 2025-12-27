@@ -3,9 +3,7 @@ import { throwError } from '@internal/common'
 import { Injectable } from '@nestjs/common'
 import { ClsService } from 'nestjs-cls'
 
-import { IRequestContext, IRequestContextService } from './request-context.service.interface'
-
-const CurrentRequestContext = Symbol('CurrentRequestContext')
+import { CurrentRequestContext, IRequestContext, IRequestContextService } from './request-context.service.interface'
 
 @Injectable()
 export class RequestContextService implements IRequestContextService {

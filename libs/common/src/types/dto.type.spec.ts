@@ -100,14 +100,14 @@ describe('Dto Type', () => {
 
   describe('Dto Static Properties', () => {
     it('should have a valid typeId', () => {
-      expect(TestDto.typeId).toBeDefined()
-      expect(typeof TestDto.typeId).toBe('string')
-      expect(TestDto.typeId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
+      expect(TestDto.$typeId).toBeDefined()
+      expect(typeof TestDto.$typeId).toBe('string')
+      expect(TestDto.$typeId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
     })
 
     it('should expose the schema', () => {
-      expect(TestDto.schema).toBeDefined()
-      expect(TestDto.schema).toBe(testDtoSchema)
+      expect(TestDto.$schema).toBeDefined()
+      expect(TestDto.$schema).toBe(testDtoSchema)
     })
   })
 

@@ -7,6 +7,9 @@
       "path": "../../libs/common"
     },
     {
+      "path": "../../modules/core/ticket"
+    },
+    {
       "path": "../../modules/core/identity"
     },
     {

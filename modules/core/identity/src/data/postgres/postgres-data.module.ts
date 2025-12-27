@@ -4,7 +4,7 @@ import type { DynamicModule } from '@nestjs/common'
 
 import { IUserRepository } from '#/domain'
 
-import { Connection } from './postgres-data.const'
+import { Database } from './postgres-data.const'
 import * as schema from './postgres-data.schema'
 import { UserRepository } from './repositories/user.repository.impl'
 
@@ -20,13 +20,14 @@ export class PostgresDataModule {
       module: PostgresDataModule,
       imports: [
         PostgresModule.forFeature({
-          Connection,
+          Database,
           healthCheck: true,
           connectionString,
           config: { schema }
         })
       ],
-      providers: [IUserRepository({ useClass: UserRepository })]
+      providers: [IUserRepository({ useClass: UserRepository })],
+      exports: [IUserRepository]
     }
   }
 }

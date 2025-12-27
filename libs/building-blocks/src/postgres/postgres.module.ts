@@ -12,7 +12,7 @@ import { ChangeTrackerModule } from '#/change-tracker'
 import { HealthService } from '#/health'
 
 export interface PostgresModuleBaseOptions {
-  Connection: TokenFn<NodePgDatabase<any>>
+  Database: TokenFn<NodePgDatabase<any>>
   healthCheck?: boolean
 }
 
@@ -31,13 +31,13 @@ export class PostgresModule {
     connectionOptions: PostgresConnectionOption,
     healthService: HealthService
   ) {
-    const { Connection, healthCheck } = moduleOptions
+    const { Database, healthCheck } = moduleOptions
     const { connectionString, config } = connectionOptions
     const pool = new Pool({ connectionString: connectionString })
 
     if (healthCheck) {
       healthService.indicators.push(async () => ({
-        [`postgres:${kebabCase(Connection.name)}`]: {
+        [`postgres:${kebabCase(Database.name)}`]: {
           status: (await pool
             .query('SELECT 1')
             .then(() => 'up')
@@ -57,19 +57,19 @@ export class PostgresModule {
   }
 
   static forFeature(options: PostgresModuleOptions): DynamicModule {
-    const { Connection, healthCheck, ...connectionOptions } = options
+    const { Database, healthCheck, ...connectionOptions } = options
 
     return {
       module: PostgresModule,
       imports: [ChangeTrackerModule],
       providers: [
-        Connection({
+        Database({
           useFactory: (healthService) =>
-            PostgresModule.createDrizzle({ Connection, healthCheck }, connectionOptions, healthService),
+            PostgresModule.createDrizzle({ Database, healthCheck }, connectionOptions, healthService),
           inject: [HealthService]
         })
       ],
-      exports: [Connection]
+      exports: [Database]
     }
   }
 }

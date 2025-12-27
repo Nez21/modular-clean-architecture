@@ -25,7 +25,7 @@ export const encodeId = <TSchema extends IdSchema<string, string>>(schema: TSche
   `${schema.meta()!.idSchema!.prefix}_${id}` as z.infer<TSchema>
 
 export const decodeId = <TSchema extends IdSchema<string, string>>(schema: TSchema, id: z.infer<TSchema>) =>
-  schema.parse(id) && id.split('_')[1]
+  schema.parse(id).split('_')[1]
 
 export const generateId = <TSchema extends IdSchema<string, string>>(schema: TSchema) => encodeId(schema, v7())
 

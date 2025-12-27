@@ -1,0 +1,28 @@
+{
+  "name": "@internal/ticket-module",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@internal/building-blocks": "workspace:^",
+    "@internal/common": "workspace:^",
+    "@nestjs/common": "11.1.6",
+    "@nestjs/graphql": "13.1.0",
+    "@restatedev/restate-sdk": "^1.0.0",
+    "drizzle-orm": "0.44.5",
+    "neverthrow": "8.2.0",
+    "reflect-metadata": "0.2.2",
+    "tslib": "2.8.1",
+    "zod": "4.1.11"
+  }
+}

@@ -42,11 +42,11 @@ export function ValueObject<TSchema extends z.ZodObject>(schema: TSchema) {
         DeepReadonly<z.output<ValueObjectSchemaOf<T>>>
     }
 
-    static get typeId(): UUID {
+    static get $typeId(): UUID {
       return typeId
     }
 
-    static get schema(): TSchema {
+    static get $schema(): TSchema {
       return schema
     }
 

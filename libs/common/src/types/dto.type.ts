@@ -45,11 +45,11 @@ export function Dto<TSchema extends z.ZodObject, TBase extends object>(
       return Object.assign(instance, schema.parse(obj))
     }
 
-    static get typeId(): UUID {
+    static get $typeId(): UUID {
       return typeId
     }
 
-    static get schema(): TSchema {
+    static get $schema(): TSchema {
       return schema
     }
 

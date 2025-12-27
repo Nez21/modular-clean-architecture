@@ -63,13 +63,14 @@ const getCachedZodGqlType = (schema: z.ZodType, type?: 'input' | 'output') => {
   return cached
 }
 
-const getScalarType = (schema: z.ZodType): GraphQLScalarType | Class | object => {
-  const metadata = schema.meta()?.graphql
+const getScalarType = (schema: z.ZodType, metadata?: GraphQLMetadata): GraphQLScalarType | Class | object => {
+  metadata ??= schema.meta()?.graphql
   const gqlType: GraphQLScalarType | Class | object | undefined = metadata?.type
 
   if (!gqlType) {
     switch (schema.constructor.name) {
-      case z.ZodString.name: {
+      case z.ZodString.name:
+      case z.ZodLiteral.name: {
         return GraphQLString
       }
       case z.ZodUUID.name: {
@@ -116,8 +117,9 @@ const registerType = (target: AnyClass<IDto>, type: 'input' | 'output') => {
 
   if (cachedGqlTypes.has(name)) return
 
+  cachedGqlTypes.set(name, target)
   const classDecorator = type === 'input' ? InputType : ObjectType
-  classDecorator(name, { description: schema.description })(target)
+  classDecorator(name, { isAbstract: true, description: schema.description })(target)
 
   const storage: Map<string, AnyClass> = new Map()
   storage.set('', target)
@@ -148,10 +150,10 @@ const registerType = (target: AnyClass<IDto>, type: 'input' | 'output') => {
     if (!nestedGqlType) {
       class Placeholder {}
 
-      classDecorator(name, { description: schema.description })(Placeholder)
+      cachedGqlTypes.set(name, Placeholder)
+      classDecorator(name, { isAbstract: true, description: schema.description })(Placeholder)
       Object.defineProperty(Placeholder, 'name', { value: name })
       storage.set(path.join('.'), Placeholder)
-      cachedGqlTypes.set(name, Placeholder)
       nestedGqlType = Placeholder
     }
 

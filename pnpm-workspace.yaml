@@ -2,5 +2,6 @@ packages:
   - 'apps/entry-point'
   - 'libs/building-blocks'
   - 'libs/common'
+  - 'libs/contracts/shared'
   - 'modules/core/identity'
-  - 'modules/core/localization'
+  - 'modules/core/ticket'

@@ -4,4 +4,4 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 
 import type * as schema from './postgres-data.schema'
 
-export const Connection = Token<NodePgDatabase<typeof schema>>('UserDatabase')
+export const Database = Token<NodePgDatabase<typeof schema>>('UserDatabase')

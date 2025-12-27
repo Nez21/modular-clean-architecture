@@ -14,6 +14,11 @@ export const traversalSchema = (
     attributes: { nullable: boolean; array: boolean; arrayNullable: boolean; defaultValue?: unknown },
     path: string[] = []
   ) => {
+    if (schema.constructor.name === z.ZodPipe.name) {
+      recurse((schema as z.ZodPipe).in as z.ZodType, attributes, path)
+      return
+    }
+
     if ([z.ZodNullable.name, z.ZodOptional.name].includes(schema.constructor.name)) {
       recurse(
         (schema as z.ZodNullable<z.ZodType> | z.ZodOptional<z.ZodType>).unwrap(),

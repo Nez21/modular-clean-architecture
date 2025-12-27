@@ -24,15 +24,15 @@ class TestEntity extends Entity(
   ['id']
 ) {
   setName(name: string) {
-    this.data.name = name
+    this.$value.name = name
   }
 
   setStatus(status: 'active' | 'inactive' | 'pending') {
-    this.data.status = status
+    this.$value.status = status
   }
 
   setMetadata(metadata: { version: number; tags: string[] } | undefined) {
-    this.data.metadata = metadata
+    this.$value.metadata = metadata
   }
 }
 
@@ -52,12 +52,16 @@ describe('ChangeTracker', () => {
 
     changeTracker = moduleRef.get(ChangeTracker)
 
-    entity = TestEntity.create({
+    entity = TestEntity.fromObject({
       id: randomUUID(),
       name: 'Initial Name',
       status: 'active',
       metadata: { version: 1, tags: ['tag1', 'tag2'] }
     })
+  })
+
+  afterEach(() => {
+    changeTracker.clear()
   })
 
   it('should be defined', () => {
@@ -281,6 +285,55 @@ describe('ChangeTracker', () => {
           value: undefined
         }
       ])
+    })
+  })
+
+  describe('toPatch', () => {
+    it('should return full entity value when entity is not tracked', () => {
+      const patch = changeTracker.toPatch(entity)
+
+      expect(patch).toEqual(entity['$value'])
+    })
+
+    it('should return empty object when there are no changes', () => {
+      changeTracker.attach(entity)
+
+      const patch = changeTracker.toPatch(entity)
+
+      expect(patch).toEqual({})
+    })
+
+    it('should return patch with single property change', () => {
+      changeTracker.attach(entity)
+
+      entity.setName('Updated Name')
+      const patch = changeTracker.toPatch(entity)
+
+      expect(patch).toEqual({
+        name: 'Updated Name'
+      })
+    })
+
+    it('should return patch with multiple property changes', () => {
+      changeTracker.attach(entity)
+
+      entity.setName('New Name')
+      entity.setStatus('inactive')
+      const patch = changeTracker.toPatch(entity)
+
+      expect(patch).toEqual({
+        name: 'New Name',
+        status: 'inactive'
+      })
+    })
+
+    it('should return patch with null for removed properties', () => {
+      changeTracker.attach(entity)
+
+      entity.setMetadata(undefined)
+      const patch = changeTracker.toPatch(entity)
+
+      expect(patch).toEqual({ metadata: null })
     })
   })
 
